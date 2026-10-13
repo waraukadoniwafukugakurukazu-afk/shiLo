@@ -1,0 +1,27 @@
+[hidden]{display:none!important}
+#hero-tagline,#about-text{white-space:pre-line}
+.shilo-stack{display:grid;gap:18px}
+.shilo-news-card{display:grid;grid-template-columns:150px 1fr;column-gap:28px;align-items:start;border-top:1px solid #babcb8;padding:25px 0}
+.shilo-news-card:last-child{border-bottom:1px solid #babcb8}
+.shilo-meta{font-size:11px!important;letter-spacing:1px;font-weight:700;margin:4px 0 10px;color:#656862}
+.shilo-news-card h3{font-size:clamp(18px,2.2vw,28px);margin:0 0 8px;line-height:1.5;grid-column:2}
+.shilo-news-card>.shilo-meta{grid-column:1;grid-row:1/4}
+.shilo-detail{white-space:pre-line;overflow-wrap:anywhere;font-size:12px;line-height:2;grid-column:2;margin:0 0 10px}
+.shilo-more{font-size:11px;font-weight:700;text-decoration:underline;text-underline-offset:4px;grid-column:2;justify-self:start;padding:9px 0}
+.shilo-live-card{display:grid;grid-template-columns:1fr 2.5fr;gap:20px;padding:29px 0;border-top:1px solid #565757}
+.shilo-live-card:last-child{border-bottom:1px solid #565757}
+.shilo-live-date{color:var(--cyan);font-size:14px;font-weight:700;letter-spacing:1px;line-height:1.7}
+.shilo-live-card h3{font-size:clamp(20px,2.5vw,30px);margin:0 0 13px;line-height:1.5}
+.shilo-live-facts,.shilo-live-note{font-size:12px;line-height:2;color:#c6c9c7;margin:0 0 10px;white-space:pre-line;overflow-wrap:anywhere}
+.shilo-live-link{display:inline-block;color:var(--ink);background:var(--cyan);font-size:11px;font-weight:700;padding:12px 18px;min-height:44px;margin-top:12px}
+.shilo-members-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.shilo-member-card{min-width:0;background:#fff}
+.shilo-member-card>img,.shilo-member-photo-placeholder{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;background:#e8f5f5}
+.shilo-member-photo-placeholder{display:grid;place-items:center;font-size:clamp(35px,6vw,84px);font-weight:700;letter-spacing:-.1em;color:#65c8c9}
+.shilo-member-card:nth-child(2n) .shilo-member-photo-placeholder{background:#ffe1f0;color:#ef79ae}
+.shilo-member-card:nth-child(3n) .shilo-member-photo-placeholder{background:#f0f5c8;color:#a4b759}
+.shilo-member-info{padding:21px 16px 30px}
+.shilo-member-info h3{font-size:clamp(22px,3vw,37px);margin:0 0 12px;letter-spacing:-.05em;overflow-wrap:anywhere}
+.shilo-member-info .shilo-detail{font-size:12px;line-height:2}
+@media(max-width:700px){.shilo-news-card{grid-template-columns:1fr;gap:6px;padding:23px 0}.shilo-news-card>.shilo-meta{grid-row:auto;grid-column:1}.shilo-news-card h3,.shilo-news-card .shilo-detail,.shilo-news-card .shilo-more{grid-column:1}.shilo-live-card{grid-template-columns:1fr;gap:7px;padding:25px 0}.shilo-members-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.shilo-member-info{padding:13px 10px 20px}.shilo-member-info h3{font-size:22px}.shilo-member-info .shilo-detail{font-size:11px}.shilo-live-date{font-size:12px}}
+@media(max-width:390px){.shilo-members-grid{grid-template-columns:1fr}.shilo-member-card>img,.shilo-member-photo-placeholder{aspect-ratio:5/4}}
