@@ -40,3 +40,24 @@ if (mascot && message) {
     if (event.animationName === 'mascot-hop') mascot.classList.remove('is-playing');
   });
 }
+
+
+// Song lottery — a playful route to a Spotify song search, not fake in-page playback.
+const randomTrackButton = document.getElementById('shuffle-track');
+const randomTrackLabel = document.getElementById('shuffle-result');
+const randomTrackLink = document.getElementById('shuffle-open');
+if (randomTrackButton && randomTrackLabel && randomTrackLink) {
+  const trackNames = ['サマーガール', 'Quest', 'JUMP', 'Desire'];
+  let previousChoice = -1;
+  randomTrackButton.addEventListener('click', () => {
+    // Never repeat the immediately previous pick when another option exists.
+    let next = Math.floor(Math.random() * (previousChoice < 0 ? trackNames.length : trackNames.length - 1));
+    if (previousChoice >= 0 && next >= previousChoice) next++;
+    previousChoice = next;
+    const song = trackNames[next];
+    randomTrackLabel.textContent = '♪ 今日は「' + song + '」！';
+    randomTrackLink.href = 'https://open.spotify.com/search/' + encodeURIComponent('shiLo ' + song);
+    randomTrackLink.hidden = false;
+    randomTrackButton.querySelector('span').textContent = '↻';
+  });
+}
