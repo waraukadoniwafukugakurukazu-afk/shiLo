@@ -25,3 +25,8 @@
 .shilo-member-info .shilo-detail{font-size:12px;line-height:2}
 @media(max-width:700px){.shilo-news-card{grid-template-columns:1fr;gap:6px;padding:23px 0}.shilo-news-card>.shilo-meta{grid-row:auto;grid-column:1}.shilo-news-card h3,.shilo-news-card .shilo-detail,.shilo-news-card .shilo-more{grid-column:1}.shilo-live-card{grid-template-columns:1fr;gap:7px;padding:25px 0}.shilo-members-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.shilo-member-info{padding:13px 10px 20px}.shilo-member-info h3{font-size:22px}.shilo-member-info .shilo-detail{font-size:11px}.shilo-live-date{font-size:12px}}
 @media(max-width:390px){.shilo-members-grid{grid-template-columns:1fr}.shilo-member-card>img,.shilo-member-photo-placeholder{aspect-ratio:5/4}}
+/* Subtle staff access from the official site footer. */
+footer .staff-entry{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 13px;background:var(--yellow);color:var(--ink);font-weight:700;white-space:nowrap;transform:rotate(-2deg);transition:transform .18s}
+footer .staff-entry:hover{transform:rotate(0deg) translateY(-2px)}
+@media(max-width:700px){footer .staff-entry{justify-self:start;font-size:10px}}
+@media(prefers-reduced-motion:reduce){footer .staff-entry{transition:none;transform:none}}
