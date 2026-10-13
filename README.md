@@ -1,64 +1,58 @@
-# shiLo 公式サイト + CONTROL ROOM
+# shiLo 公式サイト / CONTROL ROOM
 
-白い余白とカラフルなグリッチをテーマにした shiLo の公式サイト。従来の Spotify プレイヤー・写真・キャラクター演出は維持しています。
+白い余白とカラフルなグリッチがテーマの shiLo 公式サイト。スマホ向け管理画面から、ライブ・ニュース・メンバー・紹介文を更新できます。
 
-## 管理画面でできること
+## 管理者の通常操作
 
-- **LIVE**：出演名、日付、時間、会場、詳細、チケットURLの登録・編集・削除
-- **NEWS**：日付、見出し、本文、リンクの登録・編集・削除
-- **MEMBER**：名前、担当、紹介文、写真URLの登録・編集・削除
-- **TEXT**：トップのキャッチコピー、ABOUTの紹介文の変更
-- **LOGIN**：管理ID・パスワードの変更（現在のパスワードで本人確認）
-- それぞれ「公開する」をオフにして下書き保存できます。
+1. 公式サイトの最下部「STAFF LOGIN」または URL 末尾の `/admin/` を開く。
+2. 管理IDとパスワードでログインする。
+3. LIVE / NEWS / MEMBER / TEXT で追加・変更・削除。公開する項目だけ公開に切り替え、保存する。
+4. 管理IDや担当者が変わるときは「LOGIN」で更新する。
 
-管理画面は `https://＜公開サイトのURL＞/admin/`。スマホから操作できます。
+GitHub や Cloudflare の知識は日々の管理には不要です。
 
-## 重要：Cloudflare Pages への接続が必要
+## 管理画面に「管理システムへの接続を確認できません」と表示されたら
 
-今回の管理画面は **Cloudflare Pages Functions + Workers KV** で動作します。
-GitHub Pages や静的配信だけでは、管理画面の保存・ログイン・サイト全員への反映は動作しません。
-API が未設定でも **公開サイトは元の静的コンテンツを表示**します。
+このリポジトリには **Cloudflare Workers Static Assets 用の構成**を追加しました。
+画面が表示できるのにログインが動かない場合、旧来の「静的アセットのみ」のデプロイか、Worker の KV / Secret が未設定である可能性があります。
 
-### Cloudflare Pages 本番設定（初回のみ）
+### Workers（`*.workers.dev`）での初回設定
 
-1. Cloudflare の **Workers & Pages > Pages** でこの GitHub リポジトリ `waraukadoniwafukugakurukazu-afk/shiLo` と接続した Pages プロジェクトを作る（または既存の Pages プロジェクトを使う）。本番ブランチは `main`。
-2. フレームワークプリセットは **None**、ビルドコマンドは **空欄**、ビルド出力ディレクトリは **`.`**（リポジトリのルート）にする。`functions/` はリポジトリのルートに置いたままにする。
-3. **Storage & databases > KV** で新しい KV namespace を作る（例：`shilo-content`）。
-4. Pages プロジェクトの **Settings > Bindings > Add > KV namespace** でその namespace を選び、**Variable name を正確に `SHILO_DATA`** にする。
-5. Pages プロジェクトの **Settings > Variables and Secrets** で以下を **Secret（シークレット）** として登録する。
-   - `SHILO_SESSION_SECRET`：推測されないランダムな32文字以上の文字列（必須・共有しない）
-   - `SHILO_SETUP_KEY`：初回管理者設定のための別のランダムな24文字以上の文字列（最初だけ必要・共有しない）
-6. **再デプロイ**を実行する。KV バインディングや Secrets を追加しただけでは以前のデプロイには反映されない。
-7. 公開サイトの `/api/content` にアクセスし、JSON が返ることを確認する。
-8. `/admin/` にアクセスし、初期設定用キー、担当者用の管理ID、12文字以上の管理パスワードを入力する。
-9. 初期設定が成功したら **`SHILO_SETUP_KEY` を Cloudflare の Secrets から削除し、再デプロイ**する。以降の管理ID・パスワード変更は管理画面の「LOGIN」から行う。
+1. Cloudflare の **Workers & Pages** から実際に公開されている Worker（通常 `shilo`）を開く。
+2. GitHub と連動してデプロイしている場合は、GitHub `main` の変更をデプロイする。Worker Builds のビルド設定がある場合、ルートディレクトリは `/`、デプロイコマンドは `npx wrangler deploy` にする。Workers Build の Worker 名は `wrangler.jsonc` の `name` と合わせる。
+3. `wrangler.jsonc` は `src/worker.js`（API）とサイト本体の静的ファイルをひとつの Worker にまとめる設定。Workers の **KV `SHILO_DATA`** は最新の Wrangler で ID を省略した自動プロビジョニングに対応している。自動作成されない場合、Cloudflare の **Storage & databases > KV** で namespace を作り、Worker の **Settings > Bindings** から variable name `SHILO_DATA` で追加する。
+4. 同じ Worker の **Settings > Variables and Secrets** で以下を **Secret** として追加する。値はそれぞれ別の、推測されないランダムな文字列にする。
+   - `SHILO_SESSION_SECRET`：32文字以上。ログインセッションの署名用。**削除せず保持**する。
+   - `SHILO_SETUP_KEY`：24文字以上。最初の管理者を登録するための一時的な秘密キー。
+5. 設定内容を **Deploy** して、次の URL を確認する。
+   - `https://＜サイトドメイン＞/api/content`：正常なら `{ "settings": ..., "events": ..., "members": ..., "news": ... }` が表示される。
+   - `https://＜サイトドメイン＞/api/admin/session`：正常なら `{ "loggedIn": false, "setupRequired": true, "id": "" }` などが表示される。
+6. `https://＜サイトドメイン＞/admin/` を開き、初期設定用キーと、管理者用に新しく決めた管理ID・パスワード（12文字以上）を登録する。
+7. 登録できたら **`SHILO_SETUP_KEY` は削除して Deploy** する。以降の更新、管理IDとパスワードの変更は **サイト内だけ**で行う。
 
-**注意：管理ID・パスワード・初期設定用キーを GitHub のコード、HTML、issue、スクリーンショットに書かないでください。** 管理者認証はサーバー側で行い、パスワードはソルト付き PBKDF2 ハッシュで保存しています。ログインセッションは HttpOnly / Secure / SameSite=Strict Cookie を使います。
+**秘密キー、管理パスワードを GitHub に保存したり、チャットに貼ったりしないでください。**
+パスワードはランダムソルト付き PBKDF2 でハッシュ化し、セッションは HttpOnly, Secure, SameSite=Strict Cookie で保持します。
 
-### 日々の更新方法
+> 注意: GitHub だけの静的サイトでは、サーバー側の認証・複数端末への保存・全閲覧者への反映は実現できません。初回のバックエンド接続は必要です。また KV は最終的整合性のため、別端末への反映がわずかに遅れる場合があります。
 
-1. サイトURLの末尾に `/admin/` を入力
-2. 担当者の管理ID・パスワードでログイン
-3. LIVE / NEWS / MEMBER を選択し「＋ 追加する」、または既存の「編集」
-4. 「サイトに公開する」をオンにし、「保存して反映する」
-5. 公式サイトを再読み込みして確認する（KV の伝播状況で反映まで短い遅延が生じる場合があります）
+### Cloudflare Pages を利用する場合
 
-画像のアップロード自体は今回未実装です。メンバー写真は **HTTPS の画像URL** を入力してください（画像を保存する機能は将来 R2 等で追加可能）。同時編集は更新リビジョンを確認し、古いデータへの上書きをエラーで防ぎますが、KV は強い整合性のデータベースではありません。
+Pages Functions 用の `functions/api/[[path]].js` も残してあります。Pages の場合は KV バインディング `SHILO_DATA` と上記の2つのシークレットを Pages プロジェクトに登録してください。Workers の `wrangler.jsonc` は Pages 向けの設定ではありません。
 
-## 開発
+## ファイル構成
 
-公開画面のみ：`python3 -m http.server 8080`
-
-Pages Functions を含むローカル検証（Wrangler が使用できる場合）：`npx wrangler pages dev . --kv=SHILO_DATA`。ローカル検証では別途 `SHILO_SESSION_SECRET` と `SHILO_SETUP_KEY` を安全なローカル環境変数として渡してください。
-
-## 主要なファイル
-
-- `index.html`, `style.css`, `play.js`：もともとの公式サイト
-- `dynamic.css`, `content.js`：公開済みデータを公式サイトに表示する部分
+- `index.html`, `style.css`, `play.js`：従来のサイトと Spotify
+- `dynamic.css`, `content.js`：保存内容の公開表示
 - `admin/index.html`, `admin/admin.css`, `admin/admin.js`：スマホ対応の管理画面
-- `functions/api/[[path]].js`：Cloudflare Pages のサーバー側 API と認証
+- `functions/api/[[path]].js`：認証・保存の共有 API / Pages Functions
+- `src/worker.js`：Workers 用の API アダプター
+- `wrangler.jsonc`：Workers Static Assets + KV バインディング
+- `.assetsignore`：バックエンドのソースを公開アセットに含めない設定
 
-## 外部リンク
+メンバー画像のアップロード機能はまだありません。HTTPS の画像URLを入力する方式です。
 
-- [Spotify](https://open.spotify.com/intl-ja/artist/6Cs1oVBWrpkgcyUJXxBZJs)
-- [Instagram](https://www.instagram.com/shilo.46/)
+## 参考
+
+- [Cloudflare Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)
+- [Cloudflare Workers KV](https://developers.cloudflare.com/kv/concepts/kv-namespaces/)
+- [Cloudflare Workers Secrets](https://developers.cloudflare.com/workers/configuration/secrets/)

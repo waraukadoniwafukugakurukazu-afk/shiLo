@@ -1,0 +1,16 @@
+# Keep source/config outside the public static asset bundle.
+src/
+functions/
+node_modules/
+.wrangler/
+.git/
+.github/
+wrangler.jsonc
+wrangler.json
+wrangler.toml
+README.md
+.assetsignore
+.dev.vars
+.dev.vars.*
+package.json
+package-lock.json

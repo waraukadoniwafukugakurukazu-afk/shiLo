@@ -1,0 +1,15 @@
+{
+  // The published site uses the Cloudflare Worker named "shilo".
+  // If the existing Worker has another name, change this to match its dashboard name.
+  "name": "shilo",
+  "main": "./src/worker.js",
+  "compatibility_date": "2026-10-13",
+  "assets": {
+    "directory": "./",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "kv_namespaces": [
+    { "binding": "SHILO_DATA" }
+  ]
+}
