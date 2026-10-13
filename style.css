@@ -17,3 +17,19 @@ footer .wordmark img{width:105px}
 .sky-caption{position:absolute;inset:auto 0 0;padding:34px 4%;color:white;background:linear-gradient(transparent,rgba(4,16,51,.75));display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
 .sky-caption>span{font-size:10px;letter-spacing:1px}.sky-caption p{font-size:clamp(20px,3vw,40px);font-weight:700;letter-spacing:.08em;margin:0}
 @media(max-width:700px){.wordmark img{width:102px}nav{gap:14px}.release-art figcaption{font-size:9px}.music-copy .release-name{font-size:48px}.character-signature{gap:20px}.character-signature img{width:72px}.sky-interlude{margin:0 5% 48px}.sky-caption{padding:28px 6% 20px;display:block}.sky-caption p{font-size:22px;margin-top:8px}.sky-caption>span:last-child{display:none}}
+
+/* A small, silent hello from the shiLo character. */
+.mascot-play{position:relative;flex-shrink:0;text-align:center}
+.mascot-button{display:block;position:relative;padding:7px;border:0;background:transparent;cursor:pointer;touch-action:manipulation;border-radius:18px;color:inherit}
+.mascot-button img{transform:rotate(-6deg);transition:transform .25s}
+.mascot-button:focus-visible{outline:3px solid #1837c4;outline-offset:4px}
+.mascot-play>span:first-of-type{display:block;font:700 9px 'Space Grotesk',sans-serif;letter-spacing:1.5px;margin-top:7px}
+.mascot-message{position:absolute;bottom:calc(100% + 12px);left:0;min-width:170px;max-width:220px;background:var(--yellow);border-radius:14px 14px 14px 0;font-size:12px;font-weight:700;line-height:1.7;padding:12px 16px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:2}
+.mascot-message.visible{opacity:1}
+.mascot-button.is-playing img{animation:mascot-hop .55s ease both}
+.note-spark{position:absolute;left:50%;top:40%;font-size:25px;pointer-events:none;animation:note-pop .85s ease-out forwards;z-index:3;line-height:1}
+@keyframes mascot-hop{0%,100%{transform:rotate(-6deg) translateY(0)}35%{transform:rotate(10deg) translateY(-12px)}65%{transform:rotate(-12deg) translateY(-4px)}}
+@keyframes note-pop{0%{opacity:0;transform:translate(-50%,0) scale(.5)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx),-95px) rotate(var(--tilt)) scale(1.15)}}
+@media(hover:hover){.mascot-button:hover img{transform:rotate(6deg) translateY(-4px)}.wordmark:hover img{transform:rotate(-3deg)}.release-art:hover>img{transform:rotate(-1.5deg) translateY(-4px);box-shadow:16px 16px 0 #e4eaff}}
+.wordmark img,.release-art>img{transition:transform .25s,box-shadow .25s}
+@media(prefers-reduced-motion:reduce){.mascot-button.is-playing img{animation:none}.note-spark{display:none}.mascot-button:hover img,.wordmark:hover img,.release-art:hover>img{transform:none}}
