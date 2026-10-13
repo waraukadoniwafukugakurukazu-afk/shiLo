@@ -50,7 +50,7 @@ async function api(path, method = 'GET', data) {
     });
   } catch { throw new Error('サーバーに接続できません。インターネット接続を確認してください。'); }
   const result = await response.json().catch(() => null);
-  if (!result) throw new Error('管理用APIに接続できません。Cloudflare Pagesの設定を確認してください。');
+  if (!result) throw new Error('管理システムへの接続を確認できません。サイト管理者にご連絡ください。');
   if (!response.ok) throw new Error(result.error || '保存できませんでした');
   return result;
 }
@@ -248,7 +248,7 @@ $('account-form').addEventListener('submit', async event => {
     else onlyScreen(session.setupRequired ? 'setup-screen' : 'login-screen');
   } catch (error) {
     onlyScreen('loading');
-    $('loading').textContent = '管理画面の準備が必要です。Cloudflare Pages・KV・シークレットの設定を確認してください。';
+    $('loading').textContent = '管理システムは現在準備中です。公開サイトはそのままご覧いただけます。設定完了後、このページからログインできます。';
     showMessage(error.message, true);
   }
 })();
