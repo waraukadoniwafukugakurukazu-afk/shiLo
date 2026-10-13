@@ -1,9 +1,8 @@
-// Cloudflare Pages Functions: shiLo admin + public content API.
-// Required: KV binding SHILO_DATA, secrets SHILO_SETUP_KEY and SHILO_SESSION_SECRET.
+// Shared Cloudflare Workers / Pages API: content and fixed-ID shiLo staff login.
+// Requires KV SHILO_DATA and server-only secrets SHILO_SESSION_SECRET and SHILO_ADMIN_PASSWORD.
 const STORE_KEY = 'content:v1';
-const ADMIN_KEY = 'admin:v1';
 const SESSION_SECONDS = 60 * 60 * 24;
-const ITERATIONS = 160000;
+const ADMIN_ID = '1013';
 const enc = new TextEncoder();
 const jsonHeaders = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -90,20 +89,21 @@ async function getSite(env) {
   if (raw && raw.data) return { revision: str(raw.revision, 100), data: cleanContent(raw.data) };
   return { revision: 'initial', data: cleanContent({}) };
 }
-async function getAdmin(env) { return await env.SHILO_DATA.get(ADMIN_KEY, 'json'); }
-async function hashPassword(password, salt) {
-  const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: unb64(salt), iterations: ITERATIONS, hash: 'SHA-256' }, key, 256
-  );
-  return b64(new Uint8Array(bits));
+async function credentialVersion(env) {
+  // Ties existing sessions to the current server-side password without exposing the password.
+  const key = await hmacKey(env.SHILO_SESSION_SECRET);
+  const digest = await crypto.subtle.sign('HMAC', key, enc.encode('shiLo/credential:' + env.SHILO_ADMIN_PASSWORD));
+  return b64(new Uint8Array(digest));
 }
-async function newCredential(id, password) {
-  const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
-  return { id, salt, hash: await hashPassword(password, salt), version: crypto.randomUUID() };
+async function checkPassword(env, value) {
+  if (typeof value !== 'string' || value.length > 128) return false;
+  const key = await hmacKey(env.SHILO_SESSION_SECRET);
+  const [expected, supplied] = await Promise.all([
+    crypto.subtle.sign('HMAC', key, enc.encode(env.SHILO_ADMIN_PASSWORD)),
+    crypto.subtle.sign('HMAC', key, enc.encode(value))
+  ]);
+  return equalBytes(new Uint8Array(expected), new Uint8Array(supplied));
 }
-function validId(id) { return /^[\p{L}\p{N}._-]{3,40}$/u.test(id); }
-function validPass(p) { return typeof p === 'string' && p.length >= 12 && p.length <= 128; }
 function sameOrigin(request) {
   const origin = request.headers.get('Origin');
   return !!origin && origin === new URL(request.url).origin;
@@ -121,9 +121,9 @@ function cookieValue(request) {
 async function hmacKey(secret) {
   return crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
 }
-async function signSession(env, admin) {
+async function signSession(env) {
   const payload = b64(enc.encode(JSON.stringify({
-    id: admin.id, v: admin.version, exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS
+    id: ADMIN_ID, v: await credentialVersion(env), exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS
   })));
   const signature = b64(new Uint8Array(await crypto.subtle.sign('HMAC', await hmacKey(env.SHILO_SESSION_SECRET), enc.encode(payload))));
   return payload + '.' + signature;
@@ -139,8 +139,7 @@ async function activeAdmin(request, env) {
     if (!valid) return null;
     const payload = JSON.parse(new TextDecoder().decode(unb64(parts[0])));
     if (!payload.exp || payload.exp < Date.now() / 1000) return null;
-    const admin = await getAdmin(env);
-    return admin && payload.v === admin.version && payload.id === admin.id ? admin : null;
+    return payload.id === ADMIN_ID && payload.v === await credentialVersion(env) ? { id: ADMIN_ID } : null;
   } catch { return null; }
 }
 function sessionCookie(token) {
@@ -167,13 +166,13 @@ export async function onRequest({ request, env }) {
       news: data.news.filter(x => x.published)
     });
   }
-  if (!env.SHILO_SESSION_SECRET || env.SHILO_SESSION_SECRET.length < 32) {
-    return fail('管理用シークレットが未設定です。', 503);
+  if (typeof env.SHILO_SESSION_SECRET !== 'string' || env.SHILO_SESSION_SECRET.length < 32 ||
+      typeof env.SHILO_ADMIN_PASSWORD !== 'string' || env.SHILO_ADMIN_PASSWORD.length < 12) {
+    return fail('ログイン用のサーバー設定が完了していません。', 503);
   }
   if (path === '/api/admin/session' && method === 'GET') {
-    const admin = await getAdmin(env);
-    const current = admin ? await activeAdmin(request, env) : null;
-    return reply({ loggedIn: !!current, id: current ? current.id : '', setupRequired: !admin });
+    const current = await activeAdmin(request, env);
+    return reply({ loggedIn: !!current, id: current ? current.id : '', setupRequired: false });
   }
   if (path === '/api/admin/content' && method === 'GET') {
     if (!await activeAdmin(request, env)) return fail('ログインしてください', 401);
@@ -187,29 +186,17 @@ export async function onRequest({ request, env }) {
   if (!sameOrigin(request)) return fail('不正な送信元です', 403);
   let input;
   try { input = await bodyOf(request); } catch (e) { return fail(e.message); }
-  if (path === '/api/admin/setup' && method === 'POST') {
-    if (await getAdmin(env)) return fail('初期設定は完了しています', 409);
-    if (!env.SHILO_SETUP_KEY || env.SHILO_SETUP_KEY.length < 24) return fail('初期設定用キーが未設定です', 503);
-    if (str(input.setupKey, 250) !== env.SHILO_SETUP_KEY) return fail('初期設定用キーが違います', 401);
-    const id = str(input.id, 50);
-    if (!validId(id) || !validPass(input.password)) return fail('管理IDは3〜40文字、パスワードは12文字以上で入力してください');
-    const admin = await newCredential(id, input.password);
-    await env.SHILO_DATA.put(ADMIN_KEY, JSON.stringify(admin));
-    return reply({ ok: true, id }, 200, { 'Set-Cookie': sessionCookie(await signSession(env, admin)) });
-  }
   if (path === '/api/admin/login' && method === 'POST') {
     const rate = await loginRate(request, env);
     if (rate.count >= 8) return fail('ログイン試行回数が多いため、15分後にお試しください', 429);
-    const admin = await getAdmin(env);
     const id = str(input.id, 50);
-    const valid = admin && id === admin.id && typeof input.password === 'string' &&
-      equalBytes(unb64(admin.hash), unb64(await hashPassword(input.password, admin.salt)));
+    const valid = id === ADMIN_ID && await checkPassword(env, input.password);
     if (!valid) {
       await env.SHILO_DATA.put(rate.key, String(rate.count + 1), { expirationTtl: 900 });
       return fail('管理IDまたはパスワードが違います', 401);
     }
     await loginRate(request, env, true);
-    return reply({ ok: true, id }, 200, { 'Set-Cookie': sessionCookie(await signSession(env, admin)) });
+    return reply({ ok: true, id: ADMIN_ID }, 200, { 'Set-Cookie': sessionCookie(await signSession(env)) });
   }
   const admin = await activeAdmin(request, env);
   if (!admin) return fail('ログインし直してください', 401);
@@ -220,19 +207,6 @@ export async function onRequest({ request, env }) {
     const revision = crypto.randomUUID();
     await env.SHILO_DATA.put(STORE_KEY, JSON.stringify({ revision, data }));
     return reply({ ok: true, revision, data });
-  }
-  if (path === '/api/admin/account' && method === 'POST') {
-    if (typeof input.currentPassword !== 'string' ||
-      !equalBytes(unb64(admin.hash), unb64(await hashPassword(input.currentPassword, admin.salt)))) {
-      return fail('現在のパスワードが違います', 401);
-    }
-    const id = str(input.newId, 50);
-    if (!validId(id)) return fail('管理IDは3〜40文字で入力してください');
-    const password = typeof input.newPassword === 'string' && input.newPassword.length ? input.newPassword : input.currentPassword;
-    if (!validPass(password)) return fail('パスワードは12文字以上で入力してください');
-    const next = await newCredential(id, password);
-    await env.SHILO_DATA.put(ADMIN_KEY, JSON.stringify(next));
-    return reply({ ok: true, id }, 200, { 'Set-Cookie': sessionCookie(await signSession(env, next)) });
   }
   return fail('Not found', 404);
 }
