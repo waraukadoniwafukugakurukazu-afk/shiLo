@@ -55,14 +55,13 @@ async function api(path, method = 'GET', data) {
   return result;
 }
 function onlyScreen(screen) {
-  for (const id of ['loading', 'setup-screen', 'login-screen', 'workspace']) $(id).hidden = id !== screen;
+  for (const id of ['loading', 'login-screen', 'workspace']) $(id).hidden = id !== screen;
 }
 async function openWorkspace(id) {
   currentId = id;
   const result = await api('/api/admin/content');
   state = { revision: result.revision, data: result.data };
   $('signed-in').textContent = '管理者：' + currentId;
-  $('account-form').elements.namedItem('newId').value = currentId;
   onlyScreen('workspace');
   selectTab('events');
 }
@@ -72,7 +71,6 @@ function selectTab(tab) {
   $('entry-form').hidden = true;
   $('collection-pane').hidden = !schema[tab];
   $('settings-pane').hidden = tab !== 'settings';
-  $('account-pane').hidden = tab !== 'account';
   document.querySelectorAll('[data-tab]').forEach(button =>
     button.setAttribute('aria-pressed', String(button.dataset.tab === tab)));
   if (schema[tab]) {
@@ -169,17 +167,6 @@ async function submitWithLock(form, callback) {
   finally { button.disabled = false; }
 }
 
-$('setup-form').addEventListener('submit', async event => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  await submitWithLock(form, async () => {
-    const { setupKey, id, password } = Object.fromEntries(new FormData(form));
-    await api('/api/admin/setup', 'POST', { setupKey, id, password });
-    form.reset();
-    await openWorkspace(id);
-    showMessage('初期設定が完了しました。初期設定用キーはCloudflareから削除してください。');
-  });
-});
 $('login-form').addEventListener('submit', async event => {
   event.preventDefault();
   const form = event.currentTarget;
@@ -226,26 +213,11 @@ $('settings-form').addEventListener('submit', async event => {
     showMessage('紹介文を更新しました。');
   });
 });
-$('account-form').addEventListener('submit', async event => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  await submitWithLock(form, async () => {
-    const newId = form.elements.namedItem('newId').value.trim();
-    const newPassword = form.elements.namedItem('newPassword').value;
-    const currentPassword = form.elements.namedItem('currentPassword').value;
-    await api('/api/admin/account', 'POST', { newId, newPassword, currentPassword });
-    currentId = newId;
-    $('signed-in').textContent = '管理者：' + newId;
-    form.elements.namedItem('currentPassword').value = '';
-    form.elements.namedItem('newPassword').value = '';
-    showMessage('管理ID・パスワードを更新しました。古いログイン情報は無効になりました。');
-  });
-});
 (async () => {
   try {
     const session = await api('/api/admin/session');
     if (session.loggedIn) await openWorkspace(session.id);
-    else onlyScreen(session.setupRequired ? 'setup-screen' : 'login-screen');
+    else onlyScreen('login-screen');
   } catch (error) {
     onlyScreen('loading');
     $('loading').textContent = '管理システムは現在準備中です。公開サイトはそのままご覧いただけます。設定完了後、このページからログインできます。';
