@@ -316,3 +316,82 @@ footer .wordmark img{width:96px}
 }
 @media(max-width:375px){.hero-title{font-size:16.5vw}.record{width:120px}.player-deck{grid-template-columns:1fr 120px 1fr}.deck-bottom strong{font-size:24px}.header-play{padding:0 9px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.hero-portrait:hover>img,.hero-feature:hover,.action:hover{transform:none!important}}
+
+
+/* 2026-10-13: Clear, tappable navigation and predictable mobile hero.
+   The Quest card is a normal card below the photo on small screens, not an overlay. */
+.site-header nav a{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;text-align:center;min-height:52px}
+.site-header nav a small{font:500 10px/1.3 'Noto Sans JP',sans-serif;letter-spacing:0;color:#616864}
+.header-play{border-radius:3px}
+.header-play:active,.action:active,.hero-feature:active,.track-link:active{filter:brightness(.92)}
+.hero-feature .feature-action{display:inline-block;align-self:start;font-size:10px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.track-list li,.track-list li:hover{display:block;padding:0;min-height:0}
+.track-list .track-link{display:grid;grid-template-columns:60px minmax(0,1fr) 165px;gap:16px;align-items:center;min-height:96px;padding:14px 16px 14px 0;transition:background .2s,padding-left .2s}
+.track-list .track-link:hover{padding-left:13px;background:#e6ece8}
+.track-list .track-action{text-align:right;font-size:11px;line-height:1.5;font-weight:700;letter-spacing:.2px;color:#08635b}
+.track-list .track-link:focus-visible{outline-offset:-3px;background:var(--acid)}
+@media (max-width:950px){
+  .site-header nav{max-width:none}
+  .track-list .track-link{grid-template-columns:45px minmax(0,1fr) 134px}
+}
+@media (max-width:700px){
+  .site-header{grid-template-columns:minmax(0,1fr) auto;row-gap:7px;padding:13px 5% 0}
+  .site-header .wordmark img{width:96px}
+  .site-header .header-play{grid-column:2;grid-row:1;display:flex;gap:8px;padding:0 11px;min-height:46px;white-space:nowrap;font-size:11px}
+  .site-header .header-play span:nth-child(2){display:inline!important}
+  .site-header .header-play span:last-child{font-size:15px}
+  .site-header nav{grid-column:1 / -1;grid-row:2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:3px 0 0;border-top:1px solid #d6d8d2;width:100%;max-width:none}
+  .site-header nav a{min-height:60px;padding:9px 2px;gap:4px;font-size:10px;letter-spacing:.4px;line-height:1.2}
+  .site-header nav a small{display:block;font-size:9px;letter-spacing:0;line-height:1.25;white-space:nowrap}
+  .hero{overflow:visible;padding:0 5%}
+  .hero-meta{height:35px;font-size:8px}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1fr);min-height:0}
+  .hero-copy{z-index:1;min-width:0;padding:26px 0 27px;align-items:stretch;justify-content:start}
+  .hero-copy .eyebrow{font-size:9px;letter-spacing:1px;margin:0 0 17px}
+  .hero-title{font-size:clamp(60px,15vw,83px);white-space:normal;line-height:.82;letter-spacing:-.105em;margin:0 0 23px}
+  .hero-title>span:not(.hot-dot){-webkit-text-stroke:1.5px var(--ink)}
+  .hero-jp{font-size:clamp(22px,5.6vw,28px);line-height:1.45;margin:0 0 21px}
+  .hero-sub{display:none}
+  .hero-buttons{display:grid;grid-template-columns:minmax(0,1fr);gap:11px;width:100%}
+  .hero-buttons .action{width:100%;white-space:normal;min-height:58px;padding:14px 17px;font-size:14px;gap:12px;line-height:1.45;border-radius:3px}
+  .hero-buttons .action-dark{box-shadow:4px 4px 0 var(--cyan)}
+  .hero-buttons .action-outline{background:#fff;border:2px solid var(--ink)}
+  .hero-eq{display:none}
+  .hero-visual{position:relative;display:flex;flex-direction:column;gap:14px;min-height:0;height:auto;padding:0 0 25px;isolation:isolate}
+  .hero-portrait{position:relative;width:100%;height:auto!important;min-height:0!important;aspect-ratio:4/3.45;flex:none;overflow:hidden}
+  .hero-portrait>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%}
+  .hero-portrait .portrait-type{font-size:23vw;bottom:7%;left:2%;right:auto}
+  .hero-portrait .portrait-top{top:11px;left:11px;font-size:8px;padding:9px}
+  .hero-feature,.hero-feature:hover{
+    position:relative!important;
+    left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+    width:100%!important;max-width:100%;height:auto!important;min-height:110px!important;
+    margin:0;padding:9px;display:grid;grid-template-columns:91px minmax(0,1fr);
+    gap:15px;align-items:center;box-shadow:4px 4px 0 var(--ink);
+    transform:none!important;rotate:none!important;overflow:hidden;z-index:1
+  }
+  .hero-feature>img{display:block;width:91px!important;min-width:91px;max-width:91px;height:91px!important;max-height:91px;aspect-ratio:1;object-fit:cover;align-self:center}
+  .hero-feature-copy{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+  .hero-feature-copy strong{font-size:34px;line-height:1.1}
+  .hero-feature-copy small{font-size:9px;line-height:1.3}
+  .hero-feature .feature-action{margin-top:2px;background:var(--ink);color:#fff;padding:8px 10px;text-decoration:none;font-size:10px}
+  .hero-side-label{display:none}
+  .hero-star{top:25%;right:3px;font-size:38px}
+  .hero-footer{min-height:55px}
+  .hero-footer>a{min-height:44px;display:flex;align-items:center;gap:9px}
+  .track-list .track-link{grid-template-columns:29px minmax(0,1fr) 82px;gap:8px;min-height:77px;padding:13px 5px}
+  .track-list .track-link:hover{padding-left:5px}
+  .track-list .track-action{white-space:normal;font-size:9px;line-height:1.5}
+  .track-list strong{font-size:clamp(26px,7.5vw,44px)}
+}
+@media (max-width:375px){
+  .site-header .wordmark img{width:90px}
+  .site-header .header-play{font-size:10px}
+  .hero-title{font-size:15.3vw}
+  .hero-feature,.hero-feature:hover{grid-template-columns:79px minmax(0,1fr);gap:10px}
+  .hero-feature>img{width:79px!important;min-width:79px;max-width:79px;height:79px!important;max-height:79px}
+  .hero-feature-copy strong{font-size:31px}
+}
+@media(prefers-reduced-motion:reduce){
+  .track-list .track-link{transition:none}
+}

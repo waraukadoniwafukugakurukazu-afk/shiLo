@@ -8,7 +8,7 @@
 <title>shiLo | LISTEN TO THE COLOR.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./style.css?v=20261013-tapfix">
 <link rel="stylesheet" href="./dynamic.css">
 </head>
 <body>
@@ -16,12 +16,12 @@
 <header class="site-header" id="top">
   <a class="wordmark" href="#top" aria-label="shiLo ホーム"><img src="./assets/shilo-logo.jpg" alt="shiLo" width="1536" height="520"></a>
   <nav aria-label="メインメニュー">
-    <a href="#listen">LISTEN</a>
-    <a href="#music">MUSIC</a>
-    <a href="#live">LIVE</a>
-    <a href="#about">ABOUT</a>
+    <a href="#listen"><span>LISTEN</span><small>音楽を聴く</small></a>
+    <a href="#music"><span>MUSIC</span><small>楽曲一覧</small></a>
+    <a href="#live"><span>LIVE</span><small>ライブ</small></a>
+    <a href="#about"><span>ABOUT</span><small>shiLoとは</small></a>
   </nav>
-  <a class="header-play" href="#listen"><span aria-hidden="true">▶</span><span>PLAY shiLo</span><span aria-hidden="true">↗</span></a>
+  <a class="header-play" href="#listen" aria-label="音楽を聴くエリアへ移動"><span aria-hidden="true">▶</span><span>音楽を聴く</span><span aria-hidden="true">↓</span></a>
 </header>
 
 <main id="main">
@@ -34,8 +34,8 @@
       <p class="hero-jp" id="hero-tagline">日常に、<br>おしゃぽっぷなBGMを。</p>
       <p class="hero-sub">真っ白な日常に、ちょっとだけ色を。<br>好きな音から、はじめよう。</p>
       <div class="hero-buttons">
-        <a class="action action-dark" href="#listen"><span class="action-icon" aria-hidden="true">▶</span>サイトで音楽を聴く <span aria-hidden="true">↗</span></a>
-        <a class="action action-outline" href="#music">楽曲を探す <span aria-hidden="true">↗</span></a>
+        <a class="action action-dark" href="#listen"><span class="action-icon" aria-hidden="true">▶</span><span>まず音楽を聴く</span><span aria-hidden="true">↓</span></a>
+        <a class="action action-outline" href="#music"><span>曲の一覧を見る</span><span aria-hidden="true">↓</span></a>
       </div>
       <div class="hero-eq" aria-hidden="true"><span class="eq-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="eq-label">POP / ROCK / shiLo</span></div>
     </div>
@@ -47,7 +47,7 @@
       </div>
       <a class="hero-feature" href="#music" aria-label="注目曲 Quest の紹介へ">
         <img src="./assets/quest-cover.jpg" alt="" width="1536" height="1536">
-        <span class="hero-feature-copy"><small>FEATURED TRACK ↗</small><strong>Quest</strong><small>DISCOVER THE SONG</small></span>
+        <span class="hero-feature-copy"><small>FEATURED TRACK / 01</small><strong>Quest</strong><small class="feature-action">曲の紹介を見る　↗</small></span>
       </a>
       <span class="hero-side-label" aria-hidden="true">LOUDER THAN YESTERDAY — PLAY IT AGAIN</span>
       <div class="hero-star" aria-hidden="true">✳</div>
@@ -72,7 +72,7 @@
     <div class="player-main">
       <div class="player-topline"><span class="on-air"><span aria-hidden="true"></span> HIT PLAY</span><span>SPOTIFY OFFICIAL PLAYER</span></div>
       <h3>ここで、<br><em>音に出会う。</em></h3>
-      <p>再生ボタンをタップしてshiLoの音楽を楽しもう。</p>
+      <p>下のSpotifyプレイヤーの ▶ をタップして、shiLoの音楽を聴こう。</p>
       <iframe title="shiLoの楽曲 — Spotify公式プレイヤー" src="https://open.spotify.com/embed/artist/6Cs1oVBWrpkgcyUJXxBZJs?utm_source=generator" width="100%" height="352" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
       <div class="player-caption"><span>※ 再生にはSpotify側の制限が適用される場合があります。</span><a href="https://open.spotify.com/intl-ja/artist/6Cs1oVBWrpkgcyUJXxBZJs" target="_blank" rel="noopener noreferrer">SPOTIFYで開く ↗</a></div>
     </div>
@@ -94,10 +94,10 @@
   </div>
   <div class="tracks-head"><div><p class="eyebrow">SONG INDEX / shiLo</p><h3>TRACK<span>LIST</span><i>.</i></h3></div><span>FIND A SONG YOU LOVE ↘</span></div>
   <ol class="track-list">
-    <li><span class="track-no">01</span><strong>サマーガール</strong><span class="track-type">shiLo / SONG</span><span class="track-symbol" aria-hidden="true">↗</span></li>
-    <li><span class="track-no">02</span><strong>Quest</strong><span class="track-type">shiLo / SONG</span><span class="track-symbol" aria-hidden="true">↗</span></li>
-    <li><span class="track-no">03</span><strong>JUMP</strong><span class="track-type">shiLo / SONG</span><span class="track-symbol" aria-hidden="true">↗</span></li>
-    <li><span class="track-no">04</span><strong>Desire</strong><span class="track-type">shiLo / SONG</span><span class="track-symbol" aria-hidden="true">↗</span></li>
+    <li><a class="track-link" href="https://open.spotify.com/search/shiLo%20%E3%82%B5%E3%83%9E%E3%83%BC%E3%82%AC%E3%83%BC%E3%83%AB" target="_blank" rel="noopener noreferrer" aria-label="SpotifyでshiLoのサマーガールを探す"><span class="track-no">01</span><strong>サマーガール</strong><span class="track-action">Spotifyで探す ↗</span></a></li>
+    <li><a class="track-link" href="https://open.spotify.com/search/shiLo%20Quest" target="_blank" rel="noopener noreferrer" aria-label="SpotifyでshiLoのQuestを探す"><span class="track-no">02</span><strong>Quest</strong><span class="track-action">Spotifyで探す ↗</span></a></li>
+    <li><a class="track-link" href="https://open.spotify.com/search/shiLo%20JUMP" target="_blank" rel="noopener noreferrer" aria-label="SpotifyでshiLoのJUMPを探す"><span class="track-no">03</span><strong>JUMP</strong><span class="track-action">Spotifyで探す ↗</span></a></li>
+    <li><a class="track-link" href="https://open.spotify.com/search/shiLo%20Desire" target="_blank" rel="noopener noreferrer" aria-label="SpotifyでshiLoのDesireを探す"><span class="track-no">04</span><strong>Desire</strong><span class="track-action">Spotifyで探す ↗</span></a></li>
   </ol>
   <div class="track-actions"><span>気になる曲はSpotifyやEggsでチェック。</span><div><a href="https://open.spotify.com/intl-ja/artist/6Cs1oVBWrpkgcyUJXxBZJs" target="_blank" rel="noopener noreferrer">ALL SONGS / SPOTIFY ↗</a><a href="https://eggs.mu/artist/shiLo46" target="_blank" rel="noopener noreferrer">LISTEN ON EGGS ↗</a></div></div>
 </section>
