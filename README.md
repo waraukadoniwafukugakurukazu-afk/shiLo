@@ -5,7 +5,7 @@ shiLo の音楽サイトと管理用 BACKSTAGE。
 ## 管理画面の本番ログイン
 
 - 管理URL：サイトの末尾に `/admin/`
-- 管理ID：**1017（固定）**
+- 管理ID：**1013（固定）**
 - 管理パスワード：**Cloudflare Workers の Secret `SHILO_ADMIN_PASSWORD`** に管理担当者が設定する（ソースコードに記載しない）
 - ログイン後に LIVE・NEWS・MEMBER・GOODS・WORDS を編集できます。
 - 公開スイッチをオンにして保存した項目は公式サイトの表示データになります。下書きは公開されません。
@@ -20,11 +20,11 @@ shiLo の音楽サイトと管理用 BACKSTAGE。
 2. GitHubの `main` の最新コードをデプロイします。Workerが `wrangler.jsonc` の設定でビルドされ、APIを `src/worker.js` から動作させる必要があります。Workers Buildsのデプロイコマンドは `npx wrangler deploy` を利用できます。
 3. Workerの **Settings → Bindings** で KV namespace を `SHILO_DATA` として接続します。 `wrangler.jsonc` はKVの自動作成も想定していますが、作成されない場合はCloudflareからKVを作成してBindingを設定してください。
 4. **Settings → Variables and Secrets** で次の2つを **Secret** として登録します。
-   - `SHILO_ADMIN_PASSWORD`：推測困難な12文字以上のログイン用パスワード。1017と同じ・短い数字・他サービスで使うパスワードは避けてください。
+   - `SHILO_ADMIN_PASSWORD`：推測困難な12文字以上のログイン用パスワード。1013と同じ・短い数字・他サービスで使うパスワードは避けてください。
    - `SHILO_SESSION_SECRET`：別の推測困難な32文字以上のランダムな署名キー。
 5. 保存してデプロイを更新します。
 6. `https://＜公開ドメイン＞/api/admin/session` にアクセスし、JSONで `loggedIn` と `id` が返ることを確認してください。未ログイン時は `loggedIn: false` です。
-7. `https://＜公開ドメイン＞/admin/` から ID **1017** と設定したパスワードでログインしてください。
+7. `https://＜公開ドメイン＞/admin/` から ID **1013** と設定したパスワードでログインしてください。
 
 **パスワードやSecretの値はGitHub、HTML、README、チャットに書かないでください。** IDだけでは認証できません。パスワードを変更する場合は `SHILO_ADMIN_PASSWORD` を更新・デプロイし直します。変更後は古いセッションが無効になります。
 
@@ -58,3 +58,5 @@ shiLo の音楽サイトと管理用 BACKSTAGE。
 - `functions/api/[[path]].js`：本番認証とデータAPI
 - `src/worker.js`：Cloudflare Workersエントリーポイント
 - `wrangler.jsonc`：Cloudflare Workers設定
+
+**管理IDについて（2026-10）**：IDは以前の `1013` に戻しました。本番パスワードは短い数字4桁では推測されやすいため、現在のAPIでは12文字以上を必要とします。パスワードはソースコードに入れず、運営者がCloudflareの `SHILO_ADMIN_PASSWORD` Secretに設定してください。

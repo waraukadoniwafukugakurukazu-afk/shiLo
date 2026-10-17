@@ -3,7 +3,7 @@
 // Server-side session and content API; no local-storage auth or fake saves.
 (() => {
   const $ = id => document.getElementById(id);
-  const ADMIN_ID = '1017';
+  const ADMIN_ID = '1013';
   const sections = {
     events: { title: 'LIVE', number: '01', eyebrow: 'LIVE / MAKE SOME NOISE', description: '日程・会場・チケット情報を追加、編集する画面。', symbol: '♪', label: 'ライブ', fields: [
       { key:'title', label:'イベント名', type:'text', required:true, max:120, wide:true, placeholder:'ライブのタイトル' },
@@ -342,7 +342,7 @@
     button.disabled = true;
     loginError.hidden = true;
     try {
-      if (loginIdInput.value.trim() !== ADMIN_ID) throw Error('管理IDは1017です。');
+      if (loginIdInput.value.trim() !== ADMIN_ID) throw Error('管理IDは1013です。');
       await requestApi('/api/admin/login','POST',{id:loginIdInput.value.trim(),password:passwordInput.value});
       passwordInput.value = '';
       await showWorkspace();

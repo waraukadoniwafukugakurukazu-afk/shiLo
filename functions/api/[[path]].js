@@ -2,7 +2,7 @@
 // Requires KV SHILO_DATA and server-only secrets SHILO_SESSION_SECRET and SHILO_ADMIN_PASSWORD.
 const STORE_KEY = 'content:v1';
 const SESSION_SECONDS = 60 * 60 * 24;
-const ADMIN_ID = '1017';
+const ADMIN_ID = '1013';
 const enc = new TextEncoder();
 const jsonHeaders = {
   'Content-Type': 'application/json; charset=utf-8',
