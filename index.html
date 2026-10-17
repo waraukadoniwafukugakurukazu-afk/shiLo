@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="./dynamic.css">
 <link rel="stylesheet" href="./editorial.css?v=20261013-editorial01">
 <link rel="stylesheet" href="./collage.css?v=20261017-eggs-direct-2">
+<link rel="stylesheet" href="./goods.css?v=20261017-goods01">
 </head>
 <body>
 <a class="skip" href="#main">本文へスキップ</a>
@@ -21,6 +22,7 @@
     <a href="#listen"><span>LISTEN</span><small>音楽を聴く</small></a>
     <a href="#music"><span>MUSIC</span><small>楽曲一覧</small></a>
     <a href="#live"><span>LIVE</span><small>ライブ</small></a>
+    <a href="#goods"><span>GOODS</span><small>グッズ</small></a>
     <a href="#about"><span>ABOUT</span><small>shiLoとは</small></a>
   </nav>
   <a class="header-play" href="#listen" aria-label="音楽を聴くエリアへ移動"><span aria-hidden="true">▶</span><span>音楽を聴く</span><span aria-hidden="true">↓</span></a>
@@ -140,6 +142,32 @@
   <p class="live-bottom-note">SEE YOU IN THE FRONT ROW. ♫</p>
 </section>
 
+<section id="goods" class="section goods-section" aria-labelledby="goods-title">
+  <div class="goods-head">
+    <div><p class="eyebrow">MERCHANDISE DEPARTMENT / 001</p><h2 id="goods-title">GOODS<span>!</span></h2></div>
+    <div class="goods-head-note"><span class="goods-head-star" aria-hidden="true">✳</span><p>音を聴くだけじゃ、<br>ものたりない？</p><span>THE shiLo COLLECTION</span></div>
+  </div>
+
+  <div class="goods-shelf" id="goods-placeholder">
+    <div class="goods-art" aria-hidden="true">
+      <div class="goods-ticket"><span>SHILO RECORDS & GOODS</span><strong>NO.<br>046</strong><span>✳ MUSIC IN YOUR POCKET ✳</span></div>
+      <div class="goods-graphic"><span class="goods-mini-label">THE SOUND IS NOT NORMAL.</span><strong>shi<span>Lo</span><i>✳</i></strong><em>GOODS DEPT.</em></div>
+      <span class="goods-tape">MADE WITH SOUND ✳</span>
+    </div>
+    <div class="goods-info">
+      <p class="goods-overline">DROP 00 / NEW ARRIVAL?</p>
+      <div class="goods-rotated-stamp" aria-hidden="true">✳</div>
+      <h3>COMING<br><span>SOON</span><i>!</i></h3>
+      <p class="goods-description">グッズの情報をここで紹介していくよ。<br>写真・種類・価格・販売方法は、決まり次第掲載予定。</p>
+      <a class="goods-cta" href="https://www.instagram.com/shilo.46/" target="_blank" rel="noopener noreferrer"><span>最新情報はInstagramで</span><span aria-hidden="true">↗</span></a>
+      <div class="goods-fineprint"><span>shiLo / MERCHANDISE</span><span>CHECK BACK SOON ♫</span></div>
+    </div>
+  </div>
+
+  <div id="goods-list" class="goods-grid" aria-label="グッズ一覧" hidden></div>
+  <div class="goods-footer"><span>YOUR SOUND. YOUR STYLE. YOUR shiLo.</span><span>GOODS DEPARTMENT / shiLo ✳</span></div>
+</section>
+
 <section id="about" class="section about" aria-labelledby="about-title">
   <div class="about-copy"><p class="eyebrow">THE BAND / BEHIND ALL THIS NOISE</p><h2 id="about-title">ABOUT<span class="cyan">.</span></h2><p class="about-lead">音楽がある日常は、<br>ちょっと面白い。</p><p id="about-text">Tokyo pop rock band「shiLo（しろ）」。<br>真っ白なキャンバスに、<br>おしゃポップでロックな楽曲を描く。</p><div class="character-signature"><div class="mascot-play"><button class="mascot-button" type="button" aria-label="shiLoのキャラクターと遊ぶ" aria-describedby="mascot-hint"><img src="./assets/shilo-character.jpg" alt="" width="1189" height="1536" loading="lazy"></button><span id="mascot-hint">TAP ME ♪</span><span class="mascot-message" role="status" aria-live="polite"></span></div><p class="concept">おしゃぽっぷなBGM <span>✳</span></p></div></div>
   <div class="about-photo"><img src="./assets/artist.webp" alt="shiLoのアーティスト写真" loading="lazy"><div class="about-photo-tag">NO MUSIC, NO COLOR. <span>↗</span></div><span class="about-photo-label">WE ARE shiLo.</span><div class="about-tape" aria-hidden="true">STICK WITH THE SOUND ✳</div></div>
@@ -159,5 +187,6 @@
   <div class="footer-links"><a href="https://open.spotify.com/intl-ja/artist/6Cs1oVBWrpkgcyUJXxBZJs" target="_blank" rel="noopener noreferrer">SPOTIFY ↗</a><a href="https://www.instagram.com/shilo.46/" target="_blank" rel="noopener noreferrer">INSTAGRAM ↗</a><a class="staff-entry" href="./admin/" aria-label="shiLo 管理者ログイン">STAFF LOGIN ↗</a><a href="#top">TOP ↑</a></div>
 </footer>
 <script src="./play.js?v=20261017-eggs-direct-2" defer></script>
+<script src="./goods.js?v=20261017-goods01" defer></script>
 <script src="./content.js" defer></script>
 </body></html>
