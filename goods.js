@@ -1,18 +1,18 @@
 'use strict';
-/* shiLo goods listing.
-   No official products have been supplied yet, so show COMING SOON.
-   To publish items later, add objects to GOODS_ITEMS and deploy this file.
-   Keys: {name, price, description, image, link, status}.
-   Example shape (not an actual product): name:'商品名',price:'¥価格',description:'説明',
-     image:'./assets/your-goods-photo.webp',link:'https://official-sales-page.example',status:'販売中'
-   Leave link empty to show a non-clickable "販売情報準備中" label.
-*/
-const GOODS_ITEMS = [];
-
-(() => {
+// Published GOODS come from the authenticated management API (public read endpoint).
+// If the API is not configured, the existing COMING SOON design remains in place.
+(async () => {
   const grid = document.getElementById('goods-list');
   const empty = document.getElementById('goods-placeholder');
-  if (!grid || !empty || !GOODS_ITEMS.length) return;
+  if (!grid || !empty) return;
+  let GOODS_ITEMS = [];
+  try {
+    const response = await fetch('./api/content', {cache:'no-store'});
+    if (!response.ok) return;
+    const published = await response.json();
+    GOODS_ITEMS = Array.isArray(published.goods) ? published.goods : [];
+  } catch { return; }
+  if (!GOODS_ITEMS.length) return;
 
   function textElement(tag, contents, cls) {
     const el = document.createElement(tag);
@@ -40,7 +40,7 @@ const GOODS_ITEMS = [];
 
     const visual = document.createElement('div');
     visual.className = 'goods-product-media';
-    const imageUrl = safeUrl(item.image, true);
+    const imageUrl = safeUrl(item.imageUrl, true);
     if (imageUrl) {
       const img = document.createElement('img');
       img.src = imageUrl;

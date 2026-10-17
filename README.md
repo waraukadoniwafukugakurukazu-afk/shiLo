@@ -1,88 +1,60 @@
-# shiLo 公式サイト / CONTROL ROOM
+# shiLo 公式サイト / BACKSTAGE
 
-白い余白とカラフルなグリッチがテーマの shiLo 公式サイト。スマホ向け管理画面から、ライブ・ニュース・メンバー・紹介文を更新できます。
+shiLo の音楽サイトと管理用 BACKSTAGE。
 
-## スタッフの操作
+## 管理画面の本番ログイン
 
-1. 公式サイトの最下部「STAFF LOGIN」か、URL末尾の `/admin/` を開く。
-2. 管理IDは **1013 固定**。パスワードを入力してログインする。
-3. LIVE / NEWS / MEMBER / TEXT から情報を追加・変更・削除する。公開するものだけ公開に切り替え、保存する。
-4. 作業を終えたら「ログアウト」。
+- 管理URL：サイトの末尾に `/admin/`
+- 管理ID：**1017（固定）**
+- 管理パスワード：**Cloudflare Workers の Secret `SHILO_ADMIN_PASSWORD`** に管理担当者が設定する（ソースコードに記載しない）
+- ログイン後に LIVE・NEWS・MEMBER・GOODS・WORDS を編集できます。
+- 公開スイッチをオンにして保存した項目は公式サイトの表示データになります。下書きは公開されません。
+- ログアウトはサーバー側で発行した HttpOnly / Secure / SameSite=Strict Cookie を削除します。
+- 管理画面へのアクセス制限はサーバーの認証APIで行われます。HTML/CSSの閲覧だけでは編集データを取得・更新できません。
 
-サイト上で「管理アカウントを新規登録」「管理IDを変更」する機能はありません。ログインする際の ID は必ず `1013` です。
+**重要**：GitHub へのコード反映だけでは本番ログインは完了しません。Cloudflareの設定が必要です。ログイン画面で「サーバー設定が未完了」と表示される場合は下記の初期設定をしてください。
 
-## 運用環境の初期設定（デプロイ管理担当者のみ）
+### Cloudflare Workers 初回設定
 
-このコードは Cloudflare Workers Static Assets 用の構成です。管理画面で更新した情報を全員へ反映するため、バックエンドと KV の接続が必要です。
+1. Cloudflare にログインし、**Workers & Pages** からサイトを配信している Worker を開きます（通常 `shilo`）。
+2. GitHubの `main` の最新コードをデプロイします。Workerが `wrangler.jsonc` の設定でビルドされ、APIを `src/worker.js` から動作させる必要があります。Workers Buildsのデプロイコマンドは `npx wrangler deploy` を利用できます。
+3. Workerの **Settings → Bindings** で KV namespace を `SHILO_DATA` として接続します。 `wrangler.jsonc` はKVの自動作成も想定していますが、作成されない場合はCloudflareからKVを作成してBindingを設定してください。
+4. **Settings → Variables and Secrets** で次の2つを **Secret** として登録します。
+   - `SHILO_ADMIN_PASSWORD`：推測困難な12文字以上のログイン用パスワード。1017と同じ・短い数字・他サービスで使うパスワードは避けてください。
+   - `SHILO_SESSION_SECRET`：別の推測困難な32文字以上のランダムな署名キー。
+5. 保存してデプロイを更新します。
+6. `https://＜公開ドメイン＞/api/admin/session` にアクセスし、JSONで `loggedIn` と `id` が返ることを確認してください。未ログイン時は `loggedIn: false` です。
+7. `https://＜公開ドメイン＞/admin/` から ID **1017** と設定したパスワードでログインしてください。
 
-1. Cloudflare の「Workers & Pages」で公開中の Worker を確認する。GitHub の `main` から最新コードをデプロイし、実際の Worker 名と `wrangler.jsonc` の `name` が一致しているか確認する。Workers Builds を使用する場合はデプロイコマンド `npx wrangler deploy` を設定する。
-2. `SHILO_DATA` という KV バインディングを接続する。`wrangler.jsonc` の ID を省略した KV は対応 Wrangler で自動プロビジョニング可能だが、自動で作成されない場合は KV namespace を作成し Worker の Settings > Bindings から接続する。
-3. **Worker の Settings > Variables and Secrets** に次の値を **Secret** として登録する。必ず別のランダムな文字列を使用する。
-   - `SHILO_SESSION_SECRET`：32文字以上。セッション署名用。
-   - `SHILO_ADMIN_PASSWORD`：12文字以上。管理ID `1013` のログインパスワード。**推測困難な長い値を使用する。**
-4. Worker をデプロイし、`/api/content` が JSON を返すこと、`/api/admin/session` が JSON を返すことを確認する。
-5. `/admin/` で管理ID `1013` と設定したパスワードを入力しログインする。
+**パスワードやSecretの値はGitHub、HTML、README、チャットに書かないでください。** IDだけでは認証できません。パスワードを変更する場合は `SHILO_ADMIN_PASSWORD` を更新・デプロイし直します。変更後は古いセッションが無効になります。
 
-**注意**：パスワードや Secret を GitHub・README・HTML・チャットに書かないでください。Secret は Cloudflare 側で保護された値として扱います。管理IDの `1013` だけではログインできません。ログインには別途安全なパスワードが必要です。
+### 本番操作
 
-管理パスワードを変える場合は、Worker の `SHILO_ADMIN_PASSWORD` Secret を管理者が更新して再デプロイしてください。変更前のセッションはサーバー側で無効になります。アカウント登録用の `SHILO_SETUP_KEY` は **不要**です（以前設定してあれば削除可能）。
+- HOME：登録件数の確認とクイック編集
+- LIVE：公演名・日付・会場・チケットURL
+- NEWS：お知らせの見出し・本文
+- MEMBER：名前・担当・紹介文・写真URL
+- GOODS：グッズ名・価格・販売状況・写真URL・購入リンク
+- WORDS：キャッチコピー・ABOUTの紹介文
 
-ログインには HttpOnly / Secure / SameSite=Strict の Cookie を使い、失敗回数を KV で制限します。KV は最終的整合性のため、複数端末への反映が少し遅れる場合があります。GitHub Pages 等の静的配信だけでは管理機能は動作しません。
+追加・編集・削除した情報は Cloudflare KV に保存されます。 **GOODSも公開サイトのGOODS欄へ表示されます**。まだ登録がなければ COMING SOON が表示されます。
 
-### Cloudflare Pages を利用する場合
+写真は現時点では**HTTPSの画像URL登録方式**です。スマホから画像ファイルをアップロードする機能は未実装です。以前のデザイン確認モードで端末に仮保存したデータは、本番側へ自動移行されません。
 
-共有 API は `functions/api/[[path]].js` でも使えます。Pages 環境では `SHILO_DATA` KV バインディングと上記2つの Secret を Pages のプロジェクトに設定してください。
+### 注意事項
 
-## ファイル
+- Cloudflare KV は最終的整合性のデータストアなので、保存内容が他の端末に反映されるまで遅れる場合があります。複数の管理者による同時編集が必要になったらD1などの強い整合性を持つ保存先へ移行することを推奨します。
+- セッションは24時間有効です。共有端末ではログアウトしてください。
+- バックエンドが停止しているときは公開サイトの静的な要素を維持し、保存・ログインはできません。
 
-- `index.html`, `style.css`, `play.js`：公式サイト（Spotify、キャラクター演出）
-- `dynamic.css`, `content.js`：サイトへ公開済みデータを表示
-- `admin/index.html`, `admin/admin.css`, `admin/admin.js`：管理画面（ログイン・編集）
-- `functions/api/[[path]].js`：ログイン認証・データ保存用の API
-- `src/worker.js`：Workers 用の API 接続
-- `wrangler.jsonc`：Workers Static Assets と KV
-- `.assetsignore`：バックエンドのコードや設定を公開ファイルから除外
+## 主なファイル
 
-メンバー写真は現時点では画像アップロードではなく HTTPS の画像URLを入力する方式です。
-
-## GOODS（グッズ）欄について
-
-公式サイトの **LIVEとABOUTの間**に `GOODS!` セクションを追加しました。メニューから直接移動できます。まだ正式な商品情報を受け取っていないため、現在は `COMING SOON` を表示しています。架空の商品・価格・販売状況は表示していません。
-
-商品情報が決まったら `goods.js` の `GOODS_ITEMS` 配列に以下の項目を追加し、GitHubから公開環境へ反映してください。
-
-```js
-const GOODS_ITEMS = [
-  {
-    name: '商品名',
-    price: '¥1,000', // 例示価格です。実際の金額に変更してください
-    description: '商品の説明',
-    image: './assets/goods-photo.webp', // 先に画像をアップロード
-    link: 'https://example.com/shop/item', // 実際の購入/詳細ページ
-    status: '販売中' // 売り切れ / 販売終了 なども可
-  }
-];
-```
-
-1件以上登録すると `COMING SOON` 表示から商品カード一覧へ切り替わります。画像・価格・販売リンクはすべて省略可能ですが、名前だけは必須です。商品情報の編集画面（管理画面連携）はまだ未実装です。購入・決済機能はなく、実際の販売ページへのリンクを表示する仕組みです。
-
-
-## BACKSTAGE — 管理画面デザイン（認証・本番連携は保留）
-
-管理画面は **\`/admin/\`** に配置されています。shiLo の個性的なコラージュデザインを引き継いだ、スマホ・PC対応の操作できるプレビューです。
-
-- **HOME**：LIVE、NEWS、MEMBER、GOODSの登録件数とクイック編集
-- **LIVE**：公演・会場・日付・チケットリンクの編集
-- **NEWS**：お知らせの追加・編集
-- **MEMBER**：名前・担当・プロフィール・写真の編集
-- **GOODS**：グッズ名・価格・説明・写真・販売状況と販売リンク
-- **WORDS**：トップのキャッチコピー、ABOUTの文章
-- プレビュー内で追加・編集・削除・絞り込み・写真選択ができます。
-
-**重要**：このバージョンではログイン画面・認証・サーバーへのデータ送信を使用していません。ブラウザの \`localStorage\` にデザイン確認用の情報だけを仮保存します。公開サイトのLIVEやGOODSを直接変更したり、一般公開したりする機能は **ありません**。画像選択はブラウザ上の縮小プレビューであり、Cloudflare等へのアップロードは行いません。共有端末には個人情報などを入力しないでください。各種サンプルはダミー情報です。
-
-- \`admin/index.html\`：管理画面UI
-- \`admin/admin.css\`：BACKSTAGE デザインとモバイル対応
-- \`admin/admin.js\`：サンプルデータとブラウザ内でのUI動作（認証・API未使用）
-
-以前用意した \`functions/api/[[path]].js\` や Cloudflare設定のコードは、そのままリポジトリに残していますが、**現行の管理画面からは使用していません**。ログインと本番保存は、デザイン確定後に別工程として接続する予定です。現行の公開サイトには影響しません。
+- `index.html`：公開サイト
+- `content.js`：LIVE/NEWS/MEMBER/WORDSの公開表示
+- `goods.js`：公開済みGOODSの表示
+- `admin/index.html`：BACKSTAGE 管理画面
+- `admin/admin.css`：管理画面のデザインとモバイルレイアウト
+- `admin/admin.js`：本番ログイン・管理データの編集・保存
+- `functions/api/[[path]].js`：本番認証とデータAPI
+- `src/worker.js`：Cloudflare Workersエントリーポイント
+- `wrangler.jsonc`：Cloudflare Workers設定

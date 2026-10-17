@@ -1,10 +1,9 @@
 'use strict';
-// shiLo BACKSTAGE: DESIGN PREVIEW ONLY.
-// No login, no authentication, no API calls, no public content updates.
-// Everything is kept in this browser's localStorage to review the UI.
+// shiLo BACKSTAGE: authenticated admin for Cloudflare Workers/Pages.
+// Server-side session and content API; no local-storage auth or fake saves.
 (() => {
   const $ = id => document.getElementById(id);
-  const STORAGE_KEY = 'shilo-backstage-design-preview-v1';
+  const ADMIN_ID = '1017';
   const sections = {
     events: { title: 'LIVE', number: '01', eyebrow: 'LIVE / MAKE SOME NOISE', description: '日程・会場・チケット情報を追加、編集する画面。', symbol: '♪', label: 'ライブ', fields: [
       { key:'title', label:'イベント名', type:'text', required:true, max:120, wide:true, placeholder:'ライブのタイトル' },
@@ -35,36 +34,53 @@
     ]}
   };
   const categories = Object.keys(sections);
-  const demo = () => ({
-    events:[{id:'demo-event',title:'【サンプル】LIVEイベント',date:'',time:'',venue:'会場名を入力',ticketUrl:'',note:'表示確認のための仮データです。',published:false}],
-    news:[{id:'demo-news',title:'【サンプル】お知らせタイトル',date:'',body:'ここに新曲や出演情報を書いていくイメージです。',url:'',published:false}],
-    members:[{id:'demo-member',name:'【サンプル】メンバー名',role:'担当パートを入力',bio:'プロフィールのサンプルです。',imageUrl:'',published:false}],
-    goods:[{id:'demo-good',name:'【サンプル】グッズ名',price:'価格未定',status:'販売準備中',description:'商品情報が決まったら差し替えられます。',imageUrl:'',link:'',published:false}],
-    settings:{tagline:'日常に、おしゃぽっぷなBGMを。',about:'Tokyo pop rock band「shiLo（しろ）」。\n真っ白なキャンバスに、おしゃポップでロックな楽曲を描く。'}
-  });
-
-  let data = demo();
+  const empty = () => ({events:[],news:[],members:[],goods:[],settings:{tagline:'',about:''}});
+  let data = empty();
+  let revision = 'initial';
   let currentView = 'dashboard';
   let filter = 'all';
   let editingId = null;
-  let imageInForm = '';
   let lastFocus = null;
+  let isAuthenticated = false;
+  let busy = false;
 
   function deepCopy(object) { return JSON.parse(JSON.stringify(object)); }
-  function readStorage() {
+  async function requestApi(path, method = 'GET', payload) {
+    const options = {
+      method, credentials: 'same-origin', cache:'no-store',
+      headers: {'Accept':'application/json',...(payload === undefined ? {} : {'Content-Type':'application/json'})}
+    };
+    if (payload !== undefined) options.body = JSON.stringify(payload);
+    let response;
+    try { response = await fetch(path,options); }
+    catch { throw new Error('サーバーに接続できません。通信環境を確認してください。'); }
+    const result = await response.json().catch(() => null);
+    if (!result) throw new Error('管理用APIが応答していません。デプロイ設定を確認してください。');
+    if (!response.ok) {
+      if (response.status === 401 && path !== '/api/admin/login') showLogin();
+      throw new Error(result.error || 'サーバー側でエラーが発生しました。');
+    }
+    return result;
+  }
+  async function refreshServer() {
+    const result = await requestApi('/api/admin/content');
+    data = Object.assign(empty(),result.data || {});
+    revision = result.revision;
+    renderOverview();
+    navigate(currentView);
+  }
+  async function saveServer(newData) {
+    if (busy) throw new Error('保存処理中です。少し待ってから再操作してください。');
+    busy = true;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== 'object') return;
-      if (!categories.every(key => Array.isArray(parsed[key])) || !parsed.settings || typeof parsed.settings !== 'object') return;
-      data = parsed;
-    } catch { /* Private mode and blocked storage: use temporary in-memory preview. */ }
+      const result = await requestApi('/api/admin/content','PUT',{revision,data:newData});
+      data = Object.assign(empty(),result.data);
+      revision = result.revision;
+      renderOverview();
+      if (categories.includes(currentView)) renderList();
+    } finally { busy = false; }
   }
-  function saveStorage() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); return true; }
-    catch { return false; }
-  }
+
   function toast(message, error = false) {
     const el = $('feedback');
     el.textContent = message;
@@ -158,18 +174,22 @@
       const main = textEl('div','','entry-main');
       const top = textEl('div','','entry-top');
       top.append(textEl('h3',headingFor(currentView,entry),'entry-name'));
-      top.append(textEl('span',entry.published ? '公開イメージ' : '下書き','item-tag' + (entry.published ? '' : ' draft')));
+      top.append(textEl('span',entry.published ? '公開中' : '下書き','item-tag' + (entry.published ? '' : ' draft')));
       main.append(top,textEl('p',sublineFor(currentView,entry),'entry-subtitle'));
       const actions = textEl('div','','entry-buttons');
       const edit = textEl('button','編集');
       edit.type='button'; edit.addEventListener('click',() => openEditor(entry));
       const remove = textEl('button','削除','remove');
-      remove.type='button'; remove.addEventListener('click',() => {
-        if (!window.confirm('「' + headingFor(currentView,entry) + '」をプレビューから削除しますか？')) return;
-        data[currentView] = data[currentView].filter(x => x.id !== entry.id);
-        const persisted = saveStorage();
-        renderList();renderOverview();
-        toast(persisted ? 'プレビューから削除しました。公式サイトには影響しません。' : '削除しましたが、ブラウザへの仮保存はできませんでした。',!persisted);
+      remove.type='button'; remove.addEventListener('click',async () => {
+        if (!window.confirm('「' + headingFor(currentView,entry) + '」を本番から削除しますか？この変更は公開サイトにも反映されます。')) return;
+        remove.disabled = true;
+        try {
+          const nextData = deepCopy(data);
+          nextData[currentView] = nextData[currentView].filter(x => x.id !== entry.id);
+          await saveServer(nextData);
+          toast('削除しました。公開中の項目はサイトからも削除されます。');
+        } catch(error) {toast(error.message,true);}
+        finally {remove.disabled = false;}
       });
       actions.append(edit,remove);
       article.append(main,actions);
@@ -194,73 +214,31 @@
     if (field.max) input.maxLength = field.max;
     if (field.placeholder) input.placeholder = field.placeholder;
     if (field.required) input.required = true;
-    let initial = previous?.[field.key] || '';
-    if (field.type === 'image' && initial.startsWith('data:image/')) initial = '';
-    input.value = initial;
+    input.value = previous?.[field.key] || '';
     label.append(input);
     if (field.type === 'image') {
-      const hint = textEl('small','画像URLを入力、または下から写真を選んでプレビューできます。','field-hint');
+      const hint = textEl('small','現在は HTTPS の画像URLを登録できます。写真のアップロード機能は今後追加予定です。','field-hint');
       label.append(hint);
-      const picker = document.createElement('input');
-      picker.type = 'file'; picker.accept = 'image/png,image/jpeg,image/webp';
-      picker.name = 'previewFile';
-      picker.setAttribute('aria-label',field.label + 'を選ぶ');
       const preview = textEl('div','','image-preview');
-      const img = document.createElement('img'); img.alt = '選択した画像のプレビュー';
-      const helper = textEl('span','写真はこの端末での表示確認用です。実際のアップロードは後から接続します。');
-      preview.append(img,helper);
-      function updatePreview() {
-        const url = imageInForm || validUrl(input.value);
+      const img = document.createElement('img'); img.alt = '写真のプレビュー';
+      preview.append(img,textEl('span','URLの画像をここに確認できます。'));
+      function previewImage() {
+        const url = validUrl(input.value);
         preview.hidden = !url;
         if (url) img.src = url;
         else img.removeAttribute('src');
       }
-      picker.addEventListener('change', async () => {
-        const file = picker.files && picker.files[0];
-        if (!file) return;
-        try {
-          imageInForm = await resizePreview(file);
-          input.value = '';
-          updatePreview();
-          toast('写真をプレビューに追加しました。公式サイトには反映されません。');
-        } catch(error) {toast(error.message,true);}
-      });
-      input.addEventListener('input',() => {imageInForm = ''; updatePreview();});
-      label.append(picker,preview);
-      updatePreview();
+      input.addEventListener('input',previewImage);
+      previewImage();
+      label.append(preview);
     }
     return label;
-  }
-  async function resizePreview(file) {
-    if (!['image/png','image/jpeg','image/webp'].includes(file.type)) throw Error('JPEG・PNG・WebPの画像を選んでください。');
-    if (file.size > 9_000_000) throw Error('プレビュー画像は9MB以下にしてください。');
-    const source = await new Promise((resolve,reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject(new Error('画像を読み込めませんでした。'));
-      reader.readAsDataURL(file);
-    });
-    const image = await new Promise((resolve,reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('画像形式を確認してください。'));
-      img.src = source;
-    });
-    const maxSide = 650;
-    const ratio = Math.min(1, maxSide / Math.max(image.width,image.height));
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.max(1,Math.round(image.width*ratio));canvas.height = Math.max(1,Math.round(image.height*ratio));
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw Error('画像プレビューを作成できませんでした。');
-    ctx.drawImage(image,0,0,canvas.width,canvas.height);
-    return canvas.toDataURL('image/jpeg',.68);
   }
   function openEditor(entry) {
     if (!categories.includes(currentView)) return;
     lastFocus = document.activeElement;
     editingId = entry ? entry.id : null;
-    imageInForm = entry && typeof entry.imageUrl === 'string' && entry.imageUrl.startsWith('data:image/') ? entry.imageUrl : '';
-    $('editor-kicker').textContent = sections[currentView].title + ' / DESIGN PREVIEW';
+    $('editor-kicker').textContent = sections[currentView].title + ' / LIVE EDITOR';
     $('editor-heading').textContent = entry ? '情報を編集する' : '新しく追加する';
     const root = $('editor-fields');
     root.replaceChildren();
@@ -274,32 +252,37 @@
     $('editor-overlay').hidden = true;
     document.body.classList.remove('modal-open');
     editingId = null;
-    imageInForm = '';
     if (lastFocus && typeof lastFocus.focus === 'function' && lastFocus.isConnected) lastFocus.focus();
   }
-  function submitEditor(event) {
+  async function submitEditor(event) {
     event.preventDefault();
     if (!categories.includes(currentView)) return;
     const form = event.currentTarget;
     const previous = editingId ? data[currentView].find(x => x.id === editingId) : null;
-    const next = {id: previous?.id || ('preview-' + Date.now() + '-' + Math.random().toString(36).slice(2,8))};
+    const next = {id: previous?.id || crypto.randomUUID()};
     for (const field of sections[currentView].fields) {
       const el = form.elements.namedItem(field.key);
       if (!el) continue;
       const v = el.value.trim();
       if (field.type === 'url' && v && !validUrl(v)) {toast(field.label + 'に正しいURLを入力してください。',true);el.focus();return;}
-      if (field.type === 'image') next[field.key] = imageInForm || validUrl(v);
+      if (field.type === 'image') next[field.key] = validUrl(v);
       else next[field.key] = v;
       if (field.required && !v) {toast(field.label + 'を入力してください。',true);el.focus();return;}
     }
     next.published = form.elements.namedItem('published').checked;
-    const records = data[currentView];
-    const index = records.findIndex(x => x.id === editingId);
-    if (index >= 0) records[index] = next;
-    else records.unshift(next);
-    const saved = saveStorage();
-    closeEditor();renderList();renderOverview();
-    toast(saved ? '仮保存しました。公式サイトには反映されません。' : '画面には反映しましたが、端末への仮保存ができませんでした。',!saved);
+    const submitButton = form.querySelector('[type=submit]');
+    submitButton.disabled = true;
+    try {
+      const pending = deepCopy(data);
+      const records = pending[currentView];
+      const index = records.findIndex(x => x.id === editingId);
+      if (index >= 0) records[index] = next;
+      else records.unshift(next);
+      await saveServer(pending);
+      closeEditor();
+      toast(next.published ? '保存して公開しました。公式サイトを再読み込みして確認してください。' : '下書きを保存しました。');
+    } catch(error) {toast(error.message,true);}
+    finally {submitButton.disabled = false;}
   }
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click',() => navigate(b.dataset.view)));
   document.querySelectorAll('[data-mobile-view]').forEach(b => b.addEventListener('click',() => navigate(b.dataset.mobileView)));
@@ -315,21 +298,74 @@
   $('editor-backdrop').addEventListener('click',closeEditor);
   $('editor-form').addEventListener('submit',submitEditor);
   document.addEventListener('keydown',event => {if(event.key === 'Escape' && !$('editor-overlay').hidden) closeEditor();});
-  $('settings-form').addEventListener('submit',event => {
+  $('settings-form').addEventListener('submit',async event => {
     event.preventDefault();
-    data.settings = {tagline:$('setting-tagline').value.trim(),about:$('setting-about').value.trim()};
-    const saved = saveStorage();
-    toast(saved ? '文章を仮保存しました。公式サイトには反映されません。' : '画面には反映しましたが、ブラウザへの仮保存はできませんでした。',!saved);
-  });
-  $('reset-demo').addEventListener('click',() => {
-    if (!window.confirm('このブラウザで試した編集を消して、サンプルに戻しますか？')) return;
-    data = demo();
-    const saved = saveStorage();
-    navigate('dashboard');
-    toast(saved ? 'デザイン用サンプルに戻しました。' : 'サンプルに戻しました。端末への保存はできませんでした。',!saved);
+    const button = event.currentTarget.querySelector('[type=submit]');
+    button.disabled = true;
+    try {
+      const pending = deepCopy(data);
+      pending.settings = {tagline:$('setting-tagline').value.trim(),about:$('setting-about').value.trim()};
+      await saveServer(pending);
+      toast('文章を保存しました。公式サイトに反映されます。');
+    } catch(error) {toast(error.message,true);}
+    finally {button.disabled = false;}
   });
 
-  readStorage();
-  renderOverview();
-  navigate('dashboard');
+  const loginForm = $('login-form');
+  const loginIdInput = $('login-id');
+  const passwordInput = $('login-password');
+  const loginError = $('login-error');
+  const loginScreen = $('login-screen');
+  const workspace = $('workspace');
+  function showLogin(message = '') {
+    if (!$('editor-overlay').hidden) closeEditor();
+    isAuthenticated = false;
+    workspace.hidden = true;
+    loginScreen.hidden = false;
+    loginIdInput.value = ADMIN_ID;
+    passwordInput.value = '';
+    loginError.textContent = message;
+    loginError.hidden = !message;
+    toast('');
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+  async function showWorkspace() {
+    await refreshServer();
+    isAuthenticated = true;
+    loginScreen.hidden = true;
+    workspace.hidden = false;
+    navigate('dashboard');
+  }
+  loginForm.addEventListener('submit',async event => {
+    event.preventDefault();
+    const button = loginForm.querySelector('[type=submit]');
+    button.disabled = true;
+    loginError.hidden = true;
+    try {
+      if (loginIdInput.value.trim() !== ADMIN_ID) throw Error('管理IDは1017です。');
+      await requestApi('/api/admin/login','POST',{id:loginIdInput.value.trim(),password:passwordInput.value});
+      passwordInput.value = '';
+      await showWorkspace();
+      toast('ログインしました。変更内容はサーバーに保存されます。');
+    } catch(error) {
+      showLogin(error.message);
+    } finally {button.disabled = false;}
+  });
+  $('logout').addEventListener('click',async () => {
+    try {await requestApi('/api/admin/logout','POST',{});showLogin();}
+    catch(error) {toast(error.message,true);}
+  });
+  $('reload-data').addEventListener('click',async () => {
+    if (!$('editor-overlay').hidden) return;
+    try {await refreshServer();toast('最新のデータを取得しました。');}
+    catch(error) {toast(error.message,true);}
+  });
+  async function bootstrap() {
+    showLogin();
+    try {
+      const session = await requestApi('/api/admin/session');
+      if (session.loggedIn) await showWorkspace();
+    } catch(error) {showLogin(error.message);}
+  }
+  bootstrap();
 })();

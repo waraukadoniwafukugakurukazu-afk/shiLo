@@ -2,7 +2,7 @@
 // Requires KV SHILO_DATA and server-only secrets SHILO_SESSION_SECRET and SHILO_ADMIN_PASSWORD.
 const STORE_KEY = 'content:v1';
 const SESSION_SECONDS = 60 * 60 * 24;
-const ADMIN_ID = '1013';
+const ADMIN_ID = '1017';
 const enc = new TextEncoder();
 const jsonHeaders = {
   'Content-Type': 'application/json; charset=utf-8',
@@ -62,17 +62,26 @@ function items(arr, kind, max) {
     if (kind === 'events') return {
       ...base, title: str(v.title, 120), date: cleanDate(v.date),
       time: cleanTime(v.time), venue: str(v.venue, 120),
-      ticketUrl: allowedUrl(v.ticketUrl), note: str(v.note, 600)
+      ticketUrl: allowedUrl(v.ticketUrl), note: str(v.note, 700)
+    };
+    if (kind === 'goods') return {
+      ...base,
+      name: str(v.name, 120),
+      price: str(v.price, 50),
+      status: ['販売準備中','販売中','売り切れ','販売終了'].includes(v.status) ? v.status : '販売準備中',
+      description: str(v.description, 850),
+      imageUrl: allowedUrl(v.imageUrl),
+      link: allowedUrl(v.link)
     };
     if (kind === 'news') return {
       ...base, title: str(v.title, 120), date: cleanDate(v.date),
-      body: str(v.body, 1200), url: allowedUrl(v.url)
+      body: str(v.body, 1400), url: allowedUrl(v.url)
     };
     return {
-      ...base, name: str(v.name, 80), role: str(v.role, 80),
-      bio: str(v.bio, 500), imageUrl: allowedUrl(v.imageUrl)
+      ...base, name: str(v.name, 80), role: str(v.role, 100),
+      bio: str(v.bio, 800), imageUrl: allowedUrl(v.imageUrl)
     };
-  }).filter(v => (kind === 'members' ? v.name : v.title));
+  }).filter(v => (kind === 'members' || kind === 'goods' ? v.name : v.title));
 }
 function cleanContent(data) {
   const d = data && typeof data === 'object' ? data : {};
@@ -81,7 +90,8 @@ function cleanContent(data) {
     settings: { tagline: str(s.tagline, 130), about: str(s.about, 700) },
     events: items(d.events, 'events', 60),
     members: items(d.members, 'members', 30),
-    news: items(d.news, 'news', 80)
+    news: items(d.news, 'news', 80),
+    goods: items(d.goods, 'goods', 80)
   };
 }
 async function getSite(env) {
@@ -163,7 +173,8 @@ export async function onRequest({ request, env }) {
       settings: data.settings,
       events: data.events.filter(x => x.published),
       members: data.members.filter(x => x.published),
-      news: data.news.filter(x => x.published)
+      news: data.news.filter(x => x.published),
+      goods: data.goods.filter(x => x.published)
     });
   }
   if (typeof env.SHILO_SESSION_SECRET !== 'string' || env.SHILO_SESSION_SECRET.length < 32 ||
