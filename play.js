@@ -42,21 +42,26 @@ if (mascot && message) {
 }
 
 
-// Song lottery — a playful route to a Spotify song search, not fake in-page playback.
+// Song lottery — one-click deep links to the artist's verified Eggs song pages.
 const randomTrackButton = document.getElementById('shuffle-track');
 const randomTrackLabel = document.getElementById('shuffle-result');
 const randomTrackLink = document.getElementById('shuffle-open');
 if (randomTrackButton && randomTrackLabel && randomTrackLink) {
-  const trackNames = ['サマーガール', 'Quest', 'JUMP', 'Desire'];
+  const tracks = [
+    { name: 'サマーガール', url: 'https://eggs.mu/artist/shiLo46/song/c4673099-8b70-4224-81ff-d453a118e8b1' },
+    { name: 'Quest', url: 'https://eggs.mu/artist/shiLo46/song/6c1e52df-85f5-4a70-bd8d-8661b2e7ef18' },
+    { name: 'JUMP', url: 'https://eggs.mu/artist/shiLo46/song/ba1a1a9b-63e5-4b26-83ff-fa3852bae551' },
+    { name: 'Desire', url: 'https://eggs.mu/artist/shiLo46/song/22705183-6853-4823-b80b-c483117b46cc' }
+  ];
   let previousChoice = -1;
   randomTrackButton.addEventListener('click', () => {
     // Never repeat the immediately previous pick when another option exists.
-    let next = Math.floor(Math.random() * (previousChoice < 0 ? trackNames.length : trackNames.length - 1));
+    let next = Math.floor(Math.random() * (previousChoice < 0 ? tracks.length : tracks.length - 1));
     if (previousChoice >= 0 && next >= previousChoice) next++;
     previousChoice = next;
-    const song = trackNames[next];
+    const song = tracks[next].name;
     randomTrackLabel.textContent = '♪ 今日は「' + song + '」！';
-    randomTrackLink.href = 'https://open.spotify.com/search/' + encodeURIComponent('shiLo ' + song);
+    randomTrackLink.href = tracks[next].url;
     randomTrackLink.hidden = false;
     randomTrackButton.querySelector('span').textContent = '↻';
   });
