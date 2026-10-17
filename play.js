@@ -62,6 +62,8 @@ if (randomTrackButton && randomTrackLabel && randomTrackLink) {
     const song = tracks[next].name;
     randomTrackLabel.textContent = '♪ 今日は「' + song + '」！';
     randomTrackLink.href = tracks[next].url;
+    randomTrackLink.textContent = '「' + song + '」を直接聴く ↗';
+    randomTrackLink.setAttribute('aria-label', 'Eggsで「' + song + '」の楽曲ページを開く');
     randomTrackLink.hidden = false;
     randomTrackButton.querySelector('span').textContent = '↻';
   });

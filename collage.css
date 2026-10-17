@@ -275,3 +275,8 @@ footer{background:var(--ink)}
  .hero-title .hero-doodle,.poster-scribble{animation:none!important}
  .hero-portrait>img,.hero-feature{transition:none!important}
 }
+
+/* Make the selected song's direct link unmistakably tappable. */
+#shuffle-open:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:50px;margin-top:13px;padding:13px 16px;background:var(--acid);color:var(--ink);border:2px solid var(--ink);font-size:13px;font-weight:900;letter-spacing:0;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
+#shuffle-open:not([hidden]):hover{background:#fff}
+#shuffle-open:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
