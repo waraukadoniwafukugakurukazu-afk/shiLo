@@ -1,13 +1,101 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f7f7f4"><title>shiLo | CONTROL ROOM</title><link rel="stylesheet" href="./admin.css"><script src="./admin.js" defer></script></head>
-<body><a class="skip" href="#main">本文へ</a><header class="topbar"><a href="../" class="brand">shiLo<span>.</span></a><a class="public-link" href="../" target="_blank" rel="noopener">サイトを確認 ↗</a></header>
-<main id="main"><div class="intro"><p class="overline">YOUR MUSIC, YOUR CONTROL.</p><h1>CONTROL<br><em>ROOM</em><span>.</span></h1><p>ライブも、ニュースも、メンバーも。<br>スマホでさくっと更新しよう。</p></div>
-<p id="message" class="message" role="status" aria-live="polite" hidden></p>
-<section id="loading" class="access-card">管理画面を読み込んでいます…</section>
-<section id="login-screen" class="access-card" hidden><p class="overline">WELCOME BACK</p><h2>おかえりなさい。</h2><p>管理ID「1013」のパスワードを入力してください。</p><form id="login-form"><label>管理ID<input name="id" value="1013" readonly aria-readonly="true" autocomplete="username" required></label><label>パスワード<input name="password" type="password" autocomplete="current-password" required></label><button class="primary" type="submit">ログイン ↗</button></form></section>
-<section id="workspace" hidden><div class="session-strip"><span id="signed-in">ログイン中</span><button id="logout" type="button">ログアウト ↗</button></div>
-<nav class="tabs" aria-label="編集する項目"><button type="button" data-tab="events" aria-pressed="true">LIVE<small>ライブ</small></button><button type="button" data-tab="news" aria-pressed="false">NEWS<small>お知らせ</small></button><button type="button" data-tab="members" aria-pressed="false">MEMBER<small>メンバー</small></button><button type="button" data-tab="settings" aria-pressed="false">TEXT<small>紹介文</small></button></nav>
-<section id="collection-pane" class="pane"><div class="pane-head"><div><p class="overline" id="collection-kicker">01 / LIVE</p><h2 id="collection-title">ライブ情報</h2></div><button id="add-entry" class="add-button" type="button">＋ 追加する</button></div><p class="hint">「公開する」をオンにした項目だけがサイトに表示されます。</p><div id="entry-list" class="entry-list"></div>
-<form id="entry-form" class="editor" hidden><div class="editor-title"><h3 id="editor-title">新規作成</h3><button type="button" id="cancel-edit" class="text-button">キャンセル ✕</button></div><div id="entry-fields" class="fields"></div><label class="publish-toggle"><input type="checkbox" name="published"><span><b>サイトに公開する</b><small>オフなら下書きとして保存</small></span></label><button class="primary" type="submit">保存して反映する ↗</button></form></section>
-<section id="settings-pane" class="pane" hidden><p class="overline">04 / WORDS</p><h2>サイトの紹介文</h2><p class="hint">空欄の場合は、今のサイトの文章をそのまま表示します。</p><form id="settings-form" class="editor"><label>トップのキャッチコピー<textarea name="tagline" maxlength="130" rows="2"></textarea></label><label>ABOUTの紹介文<textarea name="about" maxlength="700" rows="5"></textarea></label><button class="primary" type="submit">紹介文を保存 ↗</button></form></section>
-</section></main><footer>shiLo © 2026 <span>MADE FOR THE MUSIC.</span></footer></body></html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f7f0">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="shiLo 管理画面のデザイン確認用プレビュー。ログイン・本番保存は未実装です。">
+<title>BACKSTAGE / shiLo — 管理画面デザイン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="./admin.css?v=backstage-design-1">
+<script src="./admin.js?v=backstage-design-1" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">編集エリアへ移動</a>
+<header class="topbar">
+  <a class="brand" href="../" aria-label="shiLoのホームに戻る">shi<span>Lo</span><b>✳</b></a>
+  <span class="studio-chip"><span class="live-dot" aria-hidden="true"></span> DESIGN PREVIEW</span>
+  <a class="site-link" href="../" target="_blank" rel="noopener noreferrer">公式サイトを見る <span aria-hidden="true">↗</span></a>
+</header>
+<div class="app-frame">
+  <aside class="sidebar" aria-label="管理メニュー">
+    <div class="sidebar-title"><span class="sidebar-side">SOUND DEPARTMENT / 046</span><strong>THE<br>BACKSTAGE<span>.</span></strong><p>shiLo の編集室</p></div>
+    <nav class="side-nav" aria-label="コンテンツの管理">
+      <button type="button" class="nav-item active" data-view="dashboard" aria-current="page"><span class="nav-icon" aria-hidden="true">✳</span><span>HOME<small>ダッシュボード</small></span><span class="nav-arrow">↗</span></button>
+      <button type="button" class="nav-item" data-view="events"><span class="nav-icon" aria-hidden="true">♪</span><span>LIVE<small>ライブ情報</small></span><span class="nav-count" data-count="events">0</span></button>
+      <button type="button" class="nav-item" data-view="news"><span class="nav-icon" aria-hidden="true">!</span><span>NEWS<small>お知らせ</small></span><span class="nav-count" data-count="news">0</span></button>
+      <button type="button" class="nav-item" data-view="members"><span class="nav-icon" aria-hidden="true">☺</span><span>MEMBER<small>メンバー</small></span><span class="nav-count" data-count="members">0</span></button>
+      <button type="button" class="nav-item" data-view="goods"><span class="nav-icon" aria-hidden="true">✦</span><span>GOODS<small>グッズ</small></span><span class="nav-count" data-count="goods">0</span></button>
+      <button type="button" class="nav-item" data-view="settings"><span class="nav-icon" aria-hidden="true">Aa</span><span>WORDS<small>サイトの文章</small></span><span class="nav-arrow">↗</span></button>
+    </nav>
+    <div class="sidebar-footer"><span class="little-mark">✳</span><p>THE BAND IS THE BRAND.<br><strong>MADE FOR shiLo.</strong></p></div>
+  </aside>
+
+  <main id="main" class="main">
+    <div class="notice" role="note"><span class="notice-symbol" aria-hidden="true">!</span><p><strong>デザイン確認モード</strong><span>ログイン・本番公開は未接続。ここでの変更はこのブラウザにだけ保存され、公式サイトには反映されません。</span></p></div>
+    <nav class="mobile-nav" aria-label="スマホ管理メニュー">
+      <button type="button" data-mobile-view="dashboard" aria-current="page"><span>✳</span>HOME</button>
+      <button type="button" data-mobile-view="events"><span>♪</span>LIVE</button>
+      <button type="button" data-mobile-view="news"><span>!</span>NEWS</button>
+      <button type="button" data-mobile-view="members"><span>☺</span>MEMBER</button>
+      <button type="button" data-mobile-view="goods"><span>✦</span>GOODS</button>
+      <button type="button" data-mobile-view="settings"><span>Aa</span>WORDS</button>
+    </nav>
+    <div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div>
+
+    <section id="dashboard-view" class="view">
+      <header class="page-heading"><div><p class="overline">WELCOME TO YOUR CONTROL DESK / 01</p><h1>LET'S MAKE<br><em>SOME NOISE</em><span>.</span></h1><p class="heading-description">ライブも、ニュースも、グッズも。<br>shiLoの情報をここからまとめて編集。</p></div><div class="header-art" aria-hidden="true"><span class="header-art-sun">✳</span><span class="header-art-note">ON<br>THE<br>RECORD!</span></div></header>
+      <div class="dashboard-toolbar"><span><span class="online-circle"></span> WORKSPACE / PREVIEW</span><button id="reset-demo" type="button" class="subtle-button">サンプルに戻す <span aria-hidden="true">↻</span></button></div>
+      <div id="overview-cards" class="overview-cards"></div>
+      <div class="dashboard-bottom">
+        <section class="quick-panel">
+          <div class="panel-title"><span>01 / WHAT TO DO NEXT</span><h2>QUICK EDIT<span>↗</span></h2></div>
+          <p>変更したい内容を選ぶだけ。スマホでも簡単。</p>
+          <div class="quick-buttons">
+            <button type="button" data-quick-view="events"><span>♪</span><b>ライブを追加</b><span aria-hidden="true">↗</span></button>
+            <button type="button" data-quick-view="news"><span>!</span><b>お知らせを書く</b><span aria-hidden="true">↗</span></button>
+            <button type="button" data-quick-view="goods"><span>✦</span><b>グッズを登録</b><span aria-hidden="true">↗</span></button>
+          </div>
+        </section>
+        <section class="preview-panel">
+          <div class="preview-stamp">LOOK ↘</div><p class="overline">02 / DESIGN DRAFT</p><h2>YOUR<br>CONTENT<span>.</span></h2><p>追加や変更はこの画面で試せるよ。<br>本番反映はログイン機能を作るときに接続予定。</p><div class="mini-cover"><img src="../assets/quest-cover.jpg" alt="shiLo『Quest』ジャケット" loading="lazy"><span>shiLo / CONTROL NOTES<br><b>THE SOUND GOES ON.</b></span></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="collection-view" class="view" hidden>
+      <div class="page-heading page-heading-small"><div><p id="section-eyebrow" class="overline">LIVE / EDIT YOUR SOUND</p><h1 id="section-title">LIVE<span>.</span></h1><p id="section-description" class="heading-description">ライブ情報を追加・編集できます。</p></div><div class="section-number" id="section-number">01</div></div>
+      <div class="list-toolbar">
+        <div class="filter-group" role="group" aria-label="表示を絞り込む"><button type="button" data-filter="all" aria-pressed="true">すべて</button><button type="button" data-filter="published" aria-pressed="false">公開イメージ</button><button type="button" data-filter="draft" aria-pressed="false">下書き</button></div>
+        <button id="add-item" class="add-button" type="button"><span aria-hidden="true">＋</span> 新しく追加</button>
+      </div>
+      <div id="collection-list" class="collection-list"></div>
+      <p class="list-note">※ この一覧はデザイン確認用です。本番サイトには表示されません。</p>
+    </section>
+
+    <section id="settings-view" class="view" hidden>
+      <div class="page-heading page-heading-small"><div><p class="overline">WORDS / YOUR VOICE</p><h1>WORDS<span>.</span></h1><p class="heading-description">トップのキャッチコピーと紹介文を編集する画面。</p></div><div class="section-number">Aa</div></div>
+      <form id="settings-form" class="settings-form">
+        <div class="settings-card"><span class="field-kicker">01 / TOP MESSAGE</span><label for="setting-tagline">メインのキャッチコピー</label><textarea id="setting-tagline" name="tagline" rows="3" maxlength="130" placeholder="日常に、おしゃぽっぷなBGMを。"></textarea><small>トップページのメッセージに使う想定。</small></div>
+        <div class="settings-card"><span class="field-kicker">02 / ABOUT shiLo</span><label for="setting-about">バンドの紹介文</label><textarea id="setting-about" name="about" rows="5" maxlength="700" placeholder="shiLoの紹介文"></textarea><small>ABOUT欄の文章に使う想定。</small></div>
+        <div class="settings-actions"><button type="submit" class="primary-button">この端末に仮保存 <span aria-hidden="true">↗</span></button><p>公式サイトには反映しません。</p></div>
+      </form>
+    </section>
+  </main>
+</div>
+<div id="editor-overlay" class="editor-overlay" hidden>
+  <div id="editor-backdrop" class="editor-backdrop" aria-hidden="true"></div>
+  <section class="editor-sheet" role="dialog" aria-modal="true" aria-labelledby="editor-heading">
+    <header class="editor-header"><div><p id="editor-kicker" class="overline">EDIT / DESIGN PREVIEW</p><h2 id="editor-heading">新しく追加</h2></div><button id="editor-close" type="button" class="icon-close" aria-label="編集を閉じる">×</button></header>
+    <form id="editor-form">
+      <div id="editor-fields" class="editor-fields"></div>
+      <label class="publish-control"><input type="checkbox" name="published"><span><strong>公開イメージにする</strong><small>本番への公開は行いません</small></span><span class="switch-art" aria-hidden="true"></span></label>
+      <div class="editor-footer"><button type="button" id="editor-cancel" class="cancel-button">キャンセル</button><button type="submit" class="primary-button">仮保存する <span aria-hidden="true">↗</span></button></div>
+    </form>
+  </section>
+</div>
+<footer class="bottom-footer"><span>shiLo © 2026</span><span>DESIGNED FOR THE MUSIC. ✳</span></footer>
+</body>
+</html>
